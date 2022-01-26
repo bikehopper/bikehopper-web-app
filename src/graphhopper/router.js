@@ -23,10 +23,9 @@ const routes = [
 routes.forEach(([method, path]) => {
   router[method](path, async (req, res) => {
     logger.info(`req to ${req.path}`);
-    debugger;
     try {
       const resp = await graphHopperClient.request({
-        method: req.method,
+        method: req.method.toLowerCase(),
         url: req.path,
         params: req.query,
         data: req.body
