@@ -30,7 +30,7 @@ routes.forEach(([method, path]) => {
         params: req.query,
         data: req.body
       });
-      res.send(resp);
+      res.send(resp.data);
     } catch (error) {
       if (error.response) {
         if (error.response.status > 499) {
