@@ -1,5 +1,13 @@
 # Graphhopper node app fascade
 
+## How to use
+
+Run the following commands to start the app. This requires Docker to be installed and running. It starts node with the `--inspect` flag.
+
+- `git clone`
+- `npm i`
+- `npm s`
+
 ## Routes
 
 These routes are exposed via Graphhopper and accessible from this app. They are the routes this app proxies.
