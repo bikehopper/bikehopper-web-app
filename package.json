@@ -4,7 +4,8 @@
   "description": "Bikehopper application server",
   "main": "src/index.js",
   "scripts": {
-    "start": "docker run -p 3000:3000 -p 9229:9229 -e PORT='3000' -e GRAPHHOPPER_SERVICE_NAME='bikehopper' -e NAMESPACE='techlabor' -e HOSTNAME='com'  --rm -it $(docker build -q -f Dockerfile.dev .)",
+    "build": "docker build -q -f Dockerfile.dev -t bikehopper-app:dev .",
+    "start": "npm run build && docker run -p 3000:3000 -p 9229:9229 -e PORT='3000' -e GRAPHHOPPER_SERVICE_NAME='bikehopper' -e NAMESPACE='techlabor' -e HOSTNAME='com' --rm -it bikehopper-app:dev",
     "test": "npm t"
   },
   "author": "Andy McCoy",
