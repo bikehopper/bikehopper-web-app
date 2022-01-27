@@ -1,12 +1,23 @@
-# Graphhopper node app fascade
+# bikehopper-web-app
+
+## How to setup
+
+Install these prerequisites:
+- npm and Node 14+ (for example, using [nvm](https://github.com/nvm-sh/nvm#installing-and-updating)), 
+- Docker (for example, using Docker Desktop for [Windows](https://docs.docker.com/desktop/windows/install/), [Mac](https://docs.docker.com/desktop/mac/install/))
+
+Then:
+- `git clone` this repo
+- `npm install`
+- Ensure Docker Desktop or another Docker daemon is running.
 
 ## How to use
 
-Run the following commands to start the app. This requires Docker to be installed and running. It starts node with the `--inspect` flag.
+Run `npm start` to start the app. The Node server will start printing logs to the console.
 
-- `git clone`
-- `npm i`
-- `npm s`
+In another terminal, `curl localhost:3000/health` to ensure the server is performing correctly.
+
+The v1 api is available at `curl localhost:3000/api/v1/bikehopper/<route>`.
 
 ## Routes
 
