@@ -21,16 +21,16 @@ app.use(bodyParser.json());
 // basic api hardening
 app.use(helmet());
 
-// http req logging
-app.use((req, res, next) => {
-  httpLogger(req, res);
-  next();
-});
-
 // used by k8s for health checks
 app.get('/health', (req, res) => {
   res.sendStatus(200);
   res.end();
+});
+
+// http req logging
+app.use((req, res, next) => {
+  httpLogger(req, res);
+  next();
 });
 
 // all routes that should be forwarded to graphhopper
