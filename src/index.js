@@ -30,7 +30,7 @@ app.get('/health', (req, res) => {
 });
 
 // all routes that should be forwarded to graphhopper
-app.use('/api/v1/bikehopper', graphHopperRouter);
+app.use('/v1', graphHopperRouter);
 
 process.on('SIGINT', function() {
   console.log( "\nGracefully shutting down from SIGINT (Ctrl-C)" );
