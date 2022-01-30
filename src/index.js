@@ -1,7 +1,11 @@
 const express = require('express');
 const helmet = require('helmet');
 const bodyParser = require('body-parser');
-const httpLogger = require('pino-http')();
+const httpLogger = require('pino-http')({
+  transport: {
+    target: 'pino-pretty'
+  }
+});
 const logger = require('./lib/logger');
 const {PORT: port} = require('./config');
 const app = express();
