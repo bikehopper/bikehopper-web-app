@@ -26,9 +26,7 @@ routes.forEach(([method, path]) => {
     try {
       const resp = await graphHopperClient.request({
         method: req.method.toLowerCase(),
-        url: req.path,
-        params: req.query,
-        data: req.body
+        url: req.url
       });
       res.send(resp.data);
     } catch (error) {
@@ -46,9 +44,5 @@ routes.forEach(([method, path]) => {
     }
   });
 });
-
-// router.get('/navigate/directions/v5/gh/:profile/:coordinatesArray : .+', (req, res)=> {
-
-// });
 
 module.exports = router;
