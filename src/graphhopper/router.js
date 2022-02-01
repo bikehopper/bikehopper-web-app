@@ -4,25 +4,24 @@ const graphHopperClient = require('./client');
 const logger = require('../lib/logger');
 
 const routes = [
-  ['get', '/v1/'],
-  ['get', '/v1/i18n'],
-  ['get', '/v1/i18n/:locale'],
-  ['get', '/v1/info'],
-  ['get', '/v1/isochrone'],
-  ['get', '/v1/isochrone-pt'],
-  ['post', '/v1/match'],
-  ['get', '/v1/mvt/:z/:x/:y.mvt'],
-  ['get', '/v1/nearest'],
-  ['get', '/v1/pt-mvt/:z/:x/:y.mvt'],
-  ['get', '/v1/route'],
-  ['post', '/v1/route'],
-  ['get', '/v1/route-pt'],
-  ['get', '/v1/spt'],
+  ['get', '/'],
+  ['get', '/i18n'],
+  ['get', '/i18n/:locale'],
+  ['get', '/info'],
+  ['get', '/isochrone'],
+  ['get', '/isochrone-pt'],
+  ['post', '/match'],
+  ['get', '/mvt/:z/:x/:y.mvt'],
+  ['get', '/nearest'],
+  ['get', '/pt-mvt/:z/:x/:y.mvt'],
+  ['get', '/route'],
+  ['post', '/route'],
+  ['get', '/route-pt'],
+  ['get', '/spt'],
 ];
 
 routes.forEach(([method, path]) => {
   router[method](path, async (req, res) => {
-    logger.info(`req to ${req.path}`);
     try {
       const resp = await graphHopperClient.request({
         method: req.method.toLowerCase(),

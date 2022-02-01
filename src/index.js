@@ -34,7 +34,7 @@ app.use((req, res, next) => {
 });
 
 // all routes that should be forwarded to graphhopper
-app.use(graphHopperRouter);
+app.use('/v1', graphHopperRouter);
 
 process.on('SIGINT', function() {
   console.log( "\nGracefully shutting down from SIGINT (Ctrl-C)" );
