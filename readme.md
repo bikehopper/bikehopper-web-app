@@ -3,7 +3,7 @@
 ## How to setup
 
 Install these prerequisites:
-- npm and Node 14+ (for example, using [nvm](https://github.com/nvm-sh/nvm#installing-and-updating)), 
+- npm and Node 14+ (for example, using [nvm](https://github.com/nvm-sh/nvm#installing-and-updating)),
 - Docker (for example, using Docker Desktop for [Windows](https://docs.docker.com/desktop/windows/install/), [Mac](https://docs.docker.com/desktop/mac/install/))
 
 Then:
@@ -22,19 +22,24 @@ The v1 api is available at `curl localhost:3000/api/v1/bikehopper/<route>`.
 ## Routes
 
 These routes are exposed via Graphhopper and accessible from this app. They are the routes this app proxies.
-- GET     / (com.graphhopper.application.resources.RootResource)
-- GET     /health (com.graphhopper.resources.HealthcheckResource)
-- GET     /i18n (com.graphhopper.resources.I18NResource)
-- GET     /i18n/{locale} (com.graphhopper.resources.I18NResource)
-- GET     /info (com.graphhopper.resources.InfoResource)
-- GET     /isochrone (com.graphhopper.resources.IsochroneResource)
-- GET     /isochrone-pt (com.graphhopper.resources.PtIsochroneResource)
-- POST    /match (com.graphhopper.resources.MapMatchingResource)
-- GET     /mvt/{z}/{x}/{y}.mvt (com.graphhopper.resources.MVTResource)
-- GET     /navigate/directions/v5/gh/{profile}/{coordinatesArray : .+} (com.graphhopper.navigation.NavigateResource)
-- GET     /nearest (com.graphhopper.resources.NearestResource)
-- GET     /pt-mvt/{z}/{x}/{y}.mvt (com.graphhopper.resources.PtMVTResource)
-- GET     /route (com.graphhopper.resources.RouteResource)
-- POST    /route (com.graphhopper.resources.RouteResource)
-- GET     /route-pt (com.graphhopper.resources.PtRouteResource)
-- GET     /spt (com.graphhopper.resources.SPTResource)
+- GET     /health node app health check
+- GET     /v1/ (com.graphhopper.application.resources.RootResource)
+- GET     /v1/health (com.graphhopper.resources.HealthcheckResource)
+- GET     /v1/i18n (com.graphhopper.resources.I18NResource)
+- GET     /v1/i18n/{locale} (com.graphhopper.resources.I18NResource)
+- GET     /v1/info (com.graphhopper.resources.InfoResource)
+- GET     /v1/isochrone (com.graphhopper.resources.IsochroneResource)
+- GET     /v1/isochrone-pt (com.graphhopper.resources.PtIsochroneResource)
+- POST    /v1/match (com.graphhopper.resources.MapMatchingResource)
+- GET     /v1/mvt/{z}/{x}/{y}.mvt (com.graphhopper.resources.MVTResource)
+- GET     /v1/navigate/directions/v5/gh/{profile}/{coordinatesArray : .+} (com.graphhopper.navigation.NavigateResource)
+- GET     /v1/nearest (com.graphhopper.resources.NearestResource)
+- GET     /v1/pt-mvt/{z}/{x}/{y}.mvt (com.graphhopper.resources.PtMVTResource)
+- GET     /v1/route (com.graphhopper.resources.RouteResource)
+- POST    /v1/route (com.graphhopper.resources.RouteResource)
+- GET     /v1/route-pt (com.graphhopper.resources.PtRouteResource)
+- GET     /v1/spt (com.graphhopper.resources.SPTResource)
+
+These routes are exposed from [Photon](https://photon.komoot.io/):
+- GET /v2/geocode?q=coffee&limit=1&lat=37.7749&lon=-122.4194&lang=en
+- GET /v2/reverse?lat=37.7749&lon=-122.4194
