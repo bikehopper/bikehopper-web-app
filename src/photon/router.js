@@ -14,7 +14,6 @@ router.get('/geocode', async (req, res) => {
   } catch (error) {
     if (error.response) {
       res.sendStatus(error.response.status);
-      res.send(error.response.data);
     }
     else {
       res.sendStatus(500);
@@ -34,7 +33,6 @@ router.get('/reverse', async (req, res) => {
   } catch (error) {
     if (error.response) {
       res.sendStatus(error.response.status);
-      res.send(error.response.data);
     }
     else {
       res.sendStatus(500);
