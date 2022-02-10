@@ -1,13 +1,13 @@
 const axios = require('axios');
 const {
-  PHOTON_PROTOCAL,
+  PROTOCOL,
   PHOTON_SERVICE_NAME,
   HOSTNAME,
   NAMESPACE
 } = require('../config');
 
 const client = axios.create({
-  baseURL: `${PHOTON_PROTOCAL}://${PHOTON_SERVICE_NAME}.${NAMESPACE}.${HOSTNAME}/`,
+  baseURL: `${PROTOCOL}://${PHOTON_SERVICE_NAME}.${NAMESPACE}.${HOSTNAME}/`,
   timeout: 2000
 });
 
