@@ -35,6 +35,12 @@ app.use((req, res, next) => {
   next();
 });
 
+app.use('/v1/graphhopper', graphHopperRouter);
+
+app.use('/v1/photon', photonRouter);
+
+app.use('/v1/nominatim', nominatimRouter);
+
 // all routes that should be forwarded to graphhopper
 app.use('/v1', graphHopperRouter);
 
