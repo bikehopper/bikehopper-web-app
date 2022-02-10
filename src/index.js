@@ -35,20 +35,14 @@ app.use((req, res, next) => {
   next();
 });
 
+// all routes that should be forwarded to graphhopper
 app.use('/v1/graphhopper', graphHopperRouter);
 
+// all routes that should be forwarded to photon
 app.use('/v1/photon', photonRouter);
 
+// all routes that should be forwarded to nominatim
 app.use('/v1/nominatim', nominatimRouter);
-
-// all routes that should be forwarded to graphhopper
-app.use('/v1', graphHopperRouter);
-
-// all routes that should be forwarded to graphhopper
-app.use('/v2', photonRouter);
-
-// all routes that should be forwarded to graphhopper
-app.use('/v3', nominatimRouter);
 
 process.on('SIGINT', function() {
   console.log( "\nGracefully shutting down from SIGINT (Ctrl-C)" );
