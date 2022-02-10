@@ -12,6 +12,7 @@ const app = express();
 
 const { router: graphHopperRouter } = require('./graphhopper');
 const { router: photonRouter } = require('./photon');
+const { router: nominatimRouter } = require('./nominatim');
 
 // parse application/x-www-form-urlencoded
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -39,6 +40,9 @@ app.use('/v1', graphHopperRouter);
 
 // all routes that should be forwarded to graphhopper
 app.use('/v2', photonRouter);
+
+// all routes that should be forwarded to graphhopper
+app.use('/v3', nominatimRouter);
 
 process.on('SIGINT', function() {
   console.log( "\nGracefully shutting down from SIGINT (Ctrl-C)" );

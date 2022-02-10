@@ -79,4 +79,23 @@ router.get('/details', async (req, res) => {
   res.end();
 });
 
+router.get('/status', async (req, res) => {
+  try {
+    const resp = await photonClient.request({
+      method: 'get',
+      url: '/status',
+      params: req.query
+    });
+    res.json(resp.data);
+  } catch (error) {
+    if (error.response) {
+      res.sendStatus(error.response.status);
+    }
+    else {
+      res.sendStatus(500);
+    }
+  }
+  res.end();
+});
+
 module.exports = router;
