@@ -29,15 +29,12 @@ routes.forEach(([method, path]) => {
       });
       res.send(resp.data);
     } catch (error) {
+      logger.error(error);
       if (error.response) {
-        if (error.response.status > 499) {
-          logger.error(error);
-        }
-        res.sendStatus(error.response.status);
-        res.send(error.response.data);
+        res.status(error.response.status).send(error.response.data);
       }
       else {
-        res.sendStatus(500);
+        res.status(500);
       }
       res.end();
     }
