@@ -8,7 +8,7 @@ const {
 
 const client = axios.create({
   baseURL: `${PROTOCOL}://${GRAPHHOPPER_SERVICE_NAME}.${NAMESPACE}.${HOSTNAME}/`,
-  timeout: 2000
+  timeout: 10 * 1000
 });
 
 module.exports = client;
