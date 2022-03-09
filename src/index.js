@@ -45,12 +45,12 @@ app.use('/v1/photon', photonRouter);
 app.use('/v1/nominatim', nominatimRouter);
 
 process.on('SIGINT', function() {
-  console.log( "\nGracefully shutting down from SIGINT (Ctrl-C)" );
+  logger.info( "\nGracefully shutting down from SIGINT (Ctrl-C)" );
   // some other closing procedures go here
   process.exit(0);
 });
 
 app.listen(port, () => {
-  logger.info(`Example app listening at http://localhost:${port}`)
+  logger.info(`listening at http://localhost:${port}`)
 });
 
