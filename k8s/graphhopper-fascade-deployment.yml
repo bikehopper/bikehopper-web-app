@@ -1,0 +1,71 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: graphhopper-fascade-deployment
+  labels:
+    app: graphhopper-fascade
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: graphhopper-fascade
+  template:
+    metadata:
+      labels:
+        app: graphhopper-fascade
+    spec:
+      containers:
+      - name: graphhopper-fascade
+        image: ghcr.io/bikehopper/bikehopper-web-app@sha256:a9efce131b26f667ed065b3c38feb0f50a143b53ace5cf833e3783ead422adc4
+        env:
+        - name: PORT
+          value: '3000'
+        - name: PROTOCAL
+          value: http
+        - name: NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        - name: HOSTNAME
+          value: svc.cluster.local
+        - name: GRAPHHOPPER_SERVICE_NAME
+          value: graphhopper-svc
+        - name: PHOTON_SERVICE_NAME
+          value: photon-db-svc
+        - name: NOMINATIM_SERVICE_NAME
+          value: nominatim-app-svc
+        ports:
+          - containerPort: 3000
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 3000
+          initialDelaySeconds: 3
+          periodSeconds: 5
+          timeoutSeconds: 2
+          failureThreshold: 10
+      imagePullSecrets:
+      - name: dockerconfigjson-github-com
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: graphhopper-fascade-svc
+  labels:
+    run: graphhopper-fascade
+spec:
+  type: ClusterIP
+  ports:
+  - port: 3000
+    protocol: TCP
+    name: http
+  selector:
+    app: graphhopper-fascade
