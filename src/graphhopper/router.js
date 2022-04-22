@@ -20,6 +20,17 @@ const routes = [
   ['get', '/spt'],
 ];
 
+router.use((req, res, next) => {
+  // you only want to cache for GET requests
+  if (req.method == 'GET') {
+    res.set('Cache-Control', 'public, max-age=120');
+  } else {
+    // for the other requests set strict no caching parameters
+    res.set('Cache-Control', `no-store`);
+  }
+  next();
+});
+
 routes.forEach(([method, path]) => {
   router[method](path, async (req, res) => {
     try {
