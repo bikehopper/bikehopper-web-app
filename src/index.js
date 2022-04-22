@@ -35,6 +35,17 @@ app.use((req, res, next) => {
   next();
 });
 
+app.use((req, res, next) => {
+  // you only want to cache for GET requests
+  if (req.method == 'GET') {
+    res.set('Cache-control', 'public, max-age=43200');
+  } else {
+    // for the other requests set strict no caching parameters
+    res.set('Cache-control', `no-store`);
+  }
+  next();
+})
+
 // all routes that should be forwarded to graphhopper
 app.use('/v1/graphhopper', graphHopperRouter);
 

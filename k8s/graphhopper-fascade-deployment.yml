@@ -35,6 +35,8 @@ spec:
           value: photon-db-svc
         - name: NOMINATIM_SERVICE_NAME
           value: nominatim-app-svc
+        - name: NODE_ENV
+          value: production
         ports:
           - containerPort: 3000
         resources:
