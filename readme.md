@@ -1,5 +1,8 @@
 # bikehopper-web-app
 
+Lightweight Node.js proxy for BikeHopper backends. See
+[bikehopper-ui](https://github.com/bikehopper/bikehopper-ui)
+
 ## How to setup
 
 Install these prerequisites:
