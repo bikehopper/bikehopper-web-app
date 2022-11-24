@@ -8,4 +8,4 @@ spec:
     spec:
       containers:
       - name: bikehopper-web-app
-        image: ghcr.io/bikehopper/bikehopper-web-app:v1.0.0-beta2
+        image: ghcr.io/bikehopper/bikehopper-web-app:latest
