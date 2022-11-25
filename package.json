@@ -15,8 +15,8 @@
     "body-parser": "^1.19.1",
     "express": "^4.17.2",
     "helmet": "^5.0.2",
-    "pino": "^7.6.4",
-    "pino-http": "^6.6.0",
-    "pino-pretty": "^7.5.1"
+    "pino": "^8.7.0",
+    "pino-http": "^8.2.1",
+    "pino-pretty": "^9.1.1"
   }
 }
