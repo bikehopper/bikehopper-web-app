@@ -13,6 +13,7 @@ const app = express();
 const { router: graphHopperRouter } = require('./graphhopper');
 const { router: photonRouter } = require('./photon');
 const { router: nominatimRouter } = require('./nominatim');
+const { router: fileRouter} = require('./file');
 
 // parse application/x-www-form-urlencoded
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -51,6 +52,9 @@ app.use('/v1/graphhopper', graphHopperRouter);
 
 // all routes that should be forwarded to photon
 app.use('/v1/photon', photonRouter);
+
+// all routes that should be forwarded to the fit file creator
+app.use('/v1/file', fileRouter);
 
 // all routes that should be forwarded to nominatim
 app.use('/v1/nominatim', nominatimRouter);
