@@ -1,6 +1,6 @@
 const logger = require('pino')({
   transport: {
-    target: 'pino-pretty'
+    target: 'pino-http-print'
   }
 });
 

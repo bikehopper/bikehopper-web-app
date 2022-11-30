@@ -3,7 +3,7 @@ const helmet = require('helmet');
 const bodyParser = require('body-parser');
 const httpLogger = require('pino-http')({
   transport: {
-    target: 'pino-pretty'
+    target: 'pino-http-print'
   }
 });
 const logger = require('./lib/logger');
