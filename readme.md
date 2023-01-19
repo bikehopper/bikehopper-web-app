@@ -18,9 +18,9 @@ Then:
 
 Run `npm start` to start the app. The Node server will start printing logs to the console.
 
-In another terminal, `curl localhost:3000/health` to ensure the server is performing correctly.
+In another terminal, `curl localhost:3001/health` to ensure the server is performing correctly.
 
-The v1 api is available at `curl localhost:3000/api/v1/bikehopper/<route>`.
+The v1 api is available at `curl localhost:3001/api/v1/bikehopper/<route>`.
 
 ## Routes
 
