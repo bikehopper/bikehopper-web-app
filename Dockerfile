@@ -4,5 +4,5 @@ COPY package.json /app
 COPY package-lock.json /app
 RUN npm install
 COPY ./src /app/src
-EXPOSE 3000
+EXPOSE 3001
 CMD node /app/src/index.js

@@ -37,6 +37,12 @@ app.use((req, res, next) => {
 });
 
 app.use((req, res, next) => {
+  if (process.env.NODE_ENV === 'development') {
+    res.set('access-control-allow-headers', '*');
+    res.set('access-control-allow-origin', '*');
+    res.set('access-control-allow-methods', '*');
+  }
+
   // you only want to cache for GET requests
   if (req.method == 'GET') {
     res.set('Cache-Control', 'public, max-age=43200');
