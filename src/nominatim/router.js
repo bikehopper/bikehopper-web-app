@@ -1,8 +1,8 @@
-const express = require('express');
-const router = express.Router();
-const photonClient = require('./client');
-const logger = require('../lib/logger');
+import express from 'express';
+import photonClient from './client.js';
+import logger from '../lib/logger.js';
 
+const router = express.Router();
 router.get('/search', async (req, res) => {
   try {
     const resp = await photonClient.request({
@@ -98,4 +98,4 @@ router.get('/status', async (req, res) => {
   res.end();
 });
 
-module.exports = router;
+export default router;

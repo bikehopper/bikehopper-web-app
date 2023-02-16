@@ -1,8 +1,8 @@
-const express = require('express');
-const router = express.Router();
-const graphHopperClient = require('./client');
-const logger = require('../lib/logger');
+import express from 'express';
+import graphHopperClient from './client.js';
+import logger from '../lib/logger.js';
 
+const router = express.Router();
 const routes = [
   ['get', '/'],
   ['get', '/i18n'],
@@ -52,4 +52,4 @@ routes.forEach(([method, path]) => {
   });
 });
 
-module.exports = router;
+export default router;
