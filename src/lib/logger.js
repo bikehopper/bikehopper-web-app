@@ -1,7 +1,9 @@
-const logger = require('pino')({
+import pino from 'pino';
+
+const logger = pino({
   transport: {
     target: 'pino-http-print'
   }
 });
 
-module.exports = logger;
+export default logger;

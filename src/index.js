@@ -1,19 +1,22 @@
-const express = require('express');
-const helmet = require('helmet');
-const bodyParser = require('body-parser');
-const httpLogger = require('pino-http')({
+import express from 'express';
+import helmet from 'helmet';
+import bodyParser from 'body-parser';
+import pinoHttp from 'pino-http';
+
+import logger from './lib/logger.js';
+import { PORT as port } from './config.js';
+
+import { router as graphHopperRouter } from './graphhopper/index.js';
+import { router as photonRouter } from './photon/index.js';
+import { router as nominatimRouter } from './nominatim/index.js';
+import { router as fileRouter } from './file/index.js';
+
+const httpLogger = pinoHttp({
   transport: {
     target: 'pino-http-print'
   }
 });
-const logger = require('./lib/logger');
-const {PORT: port} = require('./config');
 const app = express();
-
-const { router: graphHopperRouter } = require('./graphhopper');
-const { router: photonRouter } = require('./photon');
-const { router: nominatimRouter } = require('./nominatim');
-const { router: fileRouter} = require('./file');
 
 // parse application/x-www-form-urlencoded
 app.use(bodyParser.urlencoded({ extended: false }));

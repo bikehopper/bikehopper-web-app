@@ -1,7 +1,4 @@
-const client = require('./client');
-const router = require('./router');
+import client from './client.js';
+import router from './router.js';
 
-module.exports = {
-  client,
-  router
-};
+export { client, router };

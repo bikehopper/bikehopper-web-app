@@ -1,7 +1,9 @@
-const express = require("express");
+import express from 'express';
+
+import fileClient from './client.js';
+import logger from '../lib/logger.js';
+
 const router = express.Router();
-const fileClient = require("./client");
-const logger = require("../lib/logger");
 
 const routes = [
   ["get", "/fit"],
@@ -29,4 +31,4 @@ routes.forEach(([method, path]) => {
   });
 });
 
-module.exports = router;
+export default router;
