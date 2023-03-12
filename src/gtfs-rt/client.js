@@ -41,6 +41,7 @@ export async function getAlerts() {
   if (!response.ok) {
     const err = new Error(`${response.url}: ${response.status} ${response.statusText}`);
     err.response = response;
+    logger.error(err);
     throw err;
   }
   const buf = await response.arrayBuffer();

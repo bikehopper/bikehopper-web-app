@@ -132,6 +132,5 @@ export function mergeAlertsIntoRoutes(alerts, routeResult) {
     // url, tts_header_text, tts_description_text.
   }));
 
-  console.log('merged result:', routeResult);
   return routeResult;
 }
