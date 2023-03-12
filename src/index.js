@@ -12,9 +12,7 @@ import { router as nominatimRouter } from './nominatim/index.js';
 import { router as fileRouter } from './file/index.js';
 
 const httpLogger = pinoHttp({
-  transport: {
-    target: 'pino-http-print'
-  }
+  logger: logger,
 });
 const app = express();
 
