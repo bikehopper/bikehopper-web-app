@@ -1,4 +1,5 @@
 import { DateTime } from 'luxon';
+import logger from '../lib/logger.js';
 
 // Merges relevant GTFS service alerts into a GraphHopper response.
 // Mutates the routeResult param.
@@ -69,7 +70,13 @@ export function mergeAlertsIntoRoutes(alerts, routeResult) {
       }
     }
 
-    // filter based on agency/route/trip/stop
+    // Filter based on agency/route/trip/stop
+    // NOT SUPPORTED IN FILTERING CURRENTLY:
+    //   - Alerts with no agency_id (they will always be filtered out)
+    //   - Alerts with a trip descriptor with no trip_id but only a start time
+    //       (they will always be shown even when not relevant)
+    //   - Alerts with a direction_id (they will always be shown even when
+    //       the direction is not relevant)
     return alert.informedEntity.some(entity => {
       // Note: The strings (stop ID, trip ID, route ID) can be present but empty string.
       // In those cases we want to ignore them. So we test if they are falsy, to cover
@@ -78,9 +85,8 @@ export function mergeAlertsIntoRoutes(alerts, routeResult) {
       // In contrast, the routeType enum uses 0 to mean tram, so we compare that against
       // null/undefined rather than checking for truthiness, to make sure we don't ignore
       // a value of 0.
-
       if (entity.stopId && !boardAndAlightStopIds.has(entity.stopId)) return false;
-      if (entity.tripId && !tripIds.has(entity.tripId)) return false;
+      if (entity.trip?.tripId && !tripIds.has(entity.trip.tripId)) return false;
       if (entity.routeId && !routeIds.has(entity.routeId)) return false;
       const routeTypesForThisAgency = routeTypesByAgencyId.get(entity.agencyId);
       if (!routeTypesForThisAgency) return false;
@@ -104,8 +110,10 @@ export function mergeAlertsIntoRoutes(alerts, routeResult) {
   routeResult.service_alerts = relevantAlerts.map(alert => ({
     entities: alert.informedEntity.map(entity => ({
       stop_id: entity.stopId,
-      trip_id: entity.tripId,
-      route_type: entity.routeType,
+      trip_id: entity.trip?.tripId || null,
+      // As noted above, we must check if the routeType property is actually present
+      // or else evaluating a missing value will result in 0, which means tram.
+      route_type: entity.hasOwnProperty('routeType') ? entity.routeType : null,
       route_id: entity.routeId,
       agency_id: entity.agencyId,
     })),
