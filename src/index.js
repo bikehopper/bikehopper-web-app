@@ -11,6 +11,11 @@ import { router as photonRouter } from './photon/index.js';
 import { router as nominatimRouter } from './nominatim/index.js';
 import { router as fileRouter } from './file/index.js';
 
+if (!process.version.startsWith('v18.')) {
+  console.error('ERROR: bikehopper-web-app requires node v18');
+  process.exit(1);
+}
+
 const httpLogger = pinoHttp({
   logger: logger,
 });
