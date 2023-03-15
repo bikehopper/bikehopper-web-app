@@ -6,6 +6,7 @@ const ALERTS_URL = process.env.GTFS_REALTIME_ALERTS_URL;
 
 let _alertsCache;
 let _alertsCacheTime;
+let _alertsPromise;
 // We're allowed to make 60 requests per hour, let's be conservative and
 // cache for 3min to make it a maximum of 20
 const CACHE_LENGTH = 3 * 60 * 1000;
@@ -26,6 +27,24 @@ export async function getAlerts() {
     return null;
   }
 
+  // If there's already a fetch in progress, we'll wait for that one.
+  // But if not, let's initiate one.
+  if (!_alertsPromise)
+    _alertsPromise = _getAlertsNoCache();
+
+  try {
+    const alerts = await _alertsPromise;
+    _alertsCache = alerts;
+    _alertsCacheTime = Date.now();
+    _alertsPromise = null;
+    return alerts;
+  } catch (err) {
+    _alertsPromise = null;
+    throw err;
+  }
+}
+
+async function _getAlertsNoCache() {
   // Add the API key to the URL.
   // TODO: Figure out how to support API implementations that require it as a request
   // header instead, if that exists. I don't know. This seems to be a non-standard thing
@@ -35,9 +54,8 @@ export async function getAlerts() {
   usp.append('api_key', API_KEY);
   url.search = usp;
 
-  // FIXME: This will result in possibly sending additional requests while waiting
-  // for the first one.
   const response = await fetch(url);
+
   if (!response.ok) {
     const err = new Error(`${response.url}: ${response.status} ${response.statusText}`);
     err.response = response;
@@ -48,9 +66,7 @@ export async function getAlerts() {
   const alertFeed = GtfsRealtimeBindings.transit_realtime.FeedMessage.decode(
     new Uint8Array(buf)
   );
-  alerts = alertFeed.entity.filter(ent => ent.alert).map(ent => ent.alert);
+  const alerts = alertFeed.entity.filter(ent => ent.alert).map(ent => ent.alert);
 
-  _alertsCache = alerts;
-  _alertsCacheTime = Date.now();
   return alerts;
 }
