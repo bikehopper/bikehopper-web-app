@@ -7,7 +7,7 @@ import { mergeAlertsIntoRoutes } from '../gtfs-rt/alerts.js';
 const router = express.Router();
 router.use((req, res, next) => {
   // you only want to cache for GET requests
-  if (req.method == 'GET') {
+  if (req.method === 'GET') {
     res.set('Cache-Control', 'public, max-age=120');
   } else {
     // for the other requests set strict no caching parameters
