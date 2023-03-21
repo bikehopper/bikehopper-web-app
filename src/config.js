@@ -47,3 +47,13 @@ for (const dotenvFile of dotenvFiles) {
     dotenvExpand.expand(dotenv.config({path: dotenvFile}));
   }
 }
+
+export const GTFS_REALTIME_TOKEN = process.env.GTFS_REALTIME_TOKEN;
+export const GTFS_REALTIME_ALERTS_URL = process.env.GTFS_REALTIME_ALERTS_URL;
+
+// 511.org allows us 60 requests per hour, let's be conservative and
+// cache for 3min to make it a maximum of 20.
+const DEFAULT_ALERTS_CACHE_TIME_MSEC = 3 * 60 * 1000;
+export const ALERTS_CACHE_TIME_MSEC = (
+  process.env.ALERTS_CACHE_TIME_MSEC || DEFAULT_ALERTS_CACHE_TIME_MSEC
+);

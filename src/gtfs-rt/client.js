@@ -1,28 +1,27 @@
 import GtfsRealtimeBindings from 'gtfs-realtime-bindings';
 import logger from '../lib/logger.js';
-
-const API_KEY = process.env.GTFS_REALTIME_TOKEN;
-const ALERTS_URL = process.env.GTFS_REALTIME_ALERTS_URL;
+import {
+  GTFS_REALTIME_TOKEN,
+  GTFS_REALTIME_ALERTS_URL,
+  ALERTS_CACHE_TIME_MSEC,
+} from '../config.js';
 
 let _alertsCache;
 let _alertsCacheTime;
 let _alertsPromise;
-// We're allowed to make 60 requests per hour, let's be conservative and
-// cache for 3min to make it a maximum of 20
-const CACHE_LENGTH = 3 * 60 * 1000;
 
 export async function getAlerts() {
   let alerts;
-  if (_alertsCache && Date.now() - _alertsCacheTime < CACHE_LENGTH) {
+  if (_alertsCache && Date.now() - _alertsCacheTime < ALERTS_CACHE_TIME_MSEC) {
     return _alertsCache;
   }
 
-  if (!API_KEY) {
+  if (!GTFS_REALTIME_TOKEN) {
     logger.warn('no API key defined, cannot fetch alerts');
     return null;
   }
 
-  if (!ALERTS_URL) {
+  if (!GTFS_REALTIME_ALERTS_URL) {
     logger.warn('no GTFS-RT alerts URL defined, cannot fetch alerts');
     return null;
   }
@@ -49,9 +48,9 @@ async function _getAlertsNoCache() {
   // TODO: Figure out how to support API implementations that require it as a request
   // header instead, if that exists. I don't know. This seems to be a non-standard thing
   // that 511.org does, requiring it in the URL.
-  const url = new URL(ALERTS_URL);
+  const url = new URL(GTFS_REALTIME_ALERTS_URL);
   const usp = new URLSearchParams(url.search);
-  usp.append('api_key', API_KEY);
+  usp.append('api_key', GTFS_REALTIME_TOKEN);
   url.search = usp;
 
   const response = await fetch(url);
