@@ -31,7 +31,7 @@ router.get('/route-pt', async (req, res) => {
     if (graphHopperResult.status === 'rejected') throw graphHopperResult.reason;
     if (alertResult.status === 'rejected') logger.error(alertResult.reason);
 
-    res.send(mergeAlertsIntoRoutes(alertResult.value, graphHopperResult.value.data));
+    res.json(mergeAlertsIntoRoutes(alertResult.value, graphHopperResult.value.data));
   } catch (error) {
     logger.error(error);
     if (error.response) {
@@ -40,6 +40,7 @@ router.get('/route-pt', async (req, res) => {
     else {
       res.status(500);
     }
+  } finally {
     res.end();
   }
 });
