@@ -2,6 +2,7 @@ import express from 'express';
 import helmet from 'helmet';
 import bodyParser from 'body-parser';
 import pinoHttp from 'pino-http';
+import { satisfies } from 'compare-versions';
 
 import logger from './lib/logger.js';
 import { PORT as port } from './config.js';
@@ -10,6 +11,11 @@ import { router as graphHopperRouter } from './graphhopper/index.js';
 import { router as photonRouter } from './photon/index.js';
 import { router as nominatimRouter } from './nominatim/index.js';
 import { router as fileRouter } from './file/index.js';
+
+if (!satisfies(process.version, '>=18')) {
+  console.error('ERROR: bikehopper-web-app requires node v18');
+  process.exit(1);
+}
 
 const httpLogger = pinoHttp({
   logger: logger,
