@@ -6,7 +6,7 @@ Lightweight Node.js proxy for BikeHopper backends. See
 ## How to setup
 
 Install these prerequisites:
-- npm and Node 14+ (for example, using [nvm](https://github.com/nvm-sh/nvm#installing-and-updating)),
+- npm and Node 18+ (for example, using [nvm](https://github.com/nvm-sh/nvm#installing-and-updating)),
 - Docker (for example, using Docker Desktop for [Windows](https://docs.docker.com/desktop/windows/install/), [Mac](https://docs.docker.com/desktop/mac/install/))
 
 Then:
