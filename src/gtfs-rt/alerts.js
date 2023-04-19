@@ -93,7 +93,7 @@ function _serializeAlert(alert) {
       route_id: entity.routeId,
       agency_id: entity.agencyId,
     })),
-    timeRanges: alert.activePeriod.map(timeRange => ({
+    time_ranges: alert.activePeriod.map(timeRange => ({
       start: 1000 * parseInt(timeRange.start, 10),
       end: 1000 * parseInt(timeRange.end, 10),
     })),
