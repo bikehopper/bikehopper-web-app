@@ -6,108 +6,84 @@ import logger from '../lib/logger.js';
 export function mergeAlertsIntoRoutes(alerts, routeResult) {
   if (!routeResult || !routeResult.paths || !alerts) return routeResult;
 
-  // Alerts can be agency-wide but only for a specific route type operated by that agency,
-  // for example all cable cars operated by SFMTA but not buses or light rail.
-  const routeTypesByAgencyId = new Map();
-  // I'm assuming route, trip and stop IDs are globally unique, without having to
-  // join them with the agency ID.
-  const routeIds = new Set();
-  const tripIds = new Set();
-  const boardAndAlightStopIds = new Set();
-
-  let earliestDeparture;
-  let latestArrival;
-
   for (const path of routeResult.paths) {
     for (const leg of path.legs || []) {
       if (leg.type !== 'pt') continue;
-
-      if (typeof leg.departure_time === 'string') {
-        const timestamp = DateTime.fromISO(leg.departure_time).toMillis();
-        if (!earliestDeparture || timestamp < earliestDeparture)
-          earliestDeparture = timestamp;
-      }
-
-      if (typeof leg.arrival_time === 'string') {
-        const timestamp = DateTime.fromISO(leg.arrival_time).toMillis();
-        if (!latestArrival || timestamp > latestArrival)
-          latestArrival = timestamp;
-      }
-
-      // add agency ID and route type combo
-      if (typeof leg.agency_id === 'string') {
-        if (!routeTypesByAgencyId.has(leg.agency_id))
-          routeTypesByAgencyId.set(leg.agency_id, new Set());
-        routeTypesByAgencyId.get(leg.agency_id).add(leg.route_type);
-      }
-
-      if (typeof leg.route_id === 'string')
-        routeIds.add(leg.route_id);
-
-      if (typeof leg.trip_id === 'string')
-        tripIds.add(leg.trip_id);
-
-      if (Array.isArray(leg.stops) && leg.stops.length > 0) {
-        const boardStopId = leg.stops[0]?.stop_id;
-        const alightStopId = leg.stops[leg.stops.length - 1]?.stop_id;
-        if (typeof boardStopId === 'string')
-          boardAndAlightStopIds.add(boardStopId);
-        if (typeof alightStopId === 'string')
-          boardAndAlightStopIds.add(alightStopId);
+      for (const alert of alerts) {
+        if (_doesAlertApplyToLeg(alert, leg)) {
+          if (!leg.alerts) leg.alerts = [];
+          leg.alerts.push(_serializeAlert(alert));
+        }
       }
     }
   }
+  return routeResult;
+}
 
-  const relevantAlerts = alerts.filter(alert => {
-    // filter based on time
-    if (earliestDeparture && latestArrival && alert.activePeriod.length > 0) {
-      if (!alert.activePeriod.some(timeRange => {
-        const rangeStart = 1000 * parseInt(timeRange.start, 10);
-        const rangeEnd = 1000 * parseInt(timeRange.end, 10);
-        return !(rangeEnd < earliestDeparture || rangeStart > latestArrival);
-      })) {
-        return false;
-      }
+function _doesAlertApplyToLeg(alert, leg) {
+  // no alerts apply to non-publictransit legs
+  if (leg.type !== 'pt') return false;
+
+  // does alert apply to the time of this trip?
+  const departTs = typeof leg.departure_time === 'string'
+    && DateTime.fromISO(leg.departure_time).toMillis();
+  const arriveTs = typeof leg.arrival_time === 'string'
+    && DateTime.fromISO(leg.arrival_time).toMillis();
+  if (departTs && arriveTs && alert.activePeriod.length > 0) {
+    if (!alert.activePeriod.some(timeRange => {
+      const rangeStart = 1000 * parseInt(timeRange.start, 10);
+      const rangeEnd = 1000 * parseInt(timeRange.end, 10);
+      return !(rangeEnd < departTs || rangeStart > arriveTs);
+    })) {
+      return false;
     }
+  }
 
-    // Filter based on agency/route/trip/stop
-    // NOT SUPPORTED IN FILTERING CURRENTLY:
-    //   - Alerts with no agency_id (they will always be filtered out)
-    //   - Alerts with a trip descriptor with no trip_id but only a start time
-    //       (they will always be shown even when not relevant)
-    //   - Alerts with a direction_id (they will always be shown even when
-    //       the direction is not relevant)
-    return alert.informedEntity.some(entity => {
-      // Note: The strings (stop ID, trip ID, route ID) can be present but empty string.
-      // In those cases we want to ignore them. So we test if they are falsy, to cover
-      // empty string, undefined, or null.
-      //
-      // In contrast, the routeType enum uses 0 to mean tram, so we compare that against
-      // null/undefined rather than checking for truthiness, to make sure we don't ignore
-      // a value of 0.
-      if (entity.stopId && !boardAndAlightStopIds.has(entity.stopId)) return false;
-      if (entity.trip?.tripId && !tripIds.has(entity.trip.tripId)) return false;
-      if (entity.routeId && !routeIds.has(entity.routeId)) return false;
-      const routeTypesForThisAgency = routeTypesByAgencyId.get(entity.agencyId);
-      if (!routeTypesForThisAgency) return false;
+  // check if any of the alert's informed entities are relevant
+  for (const entity of alert.informedEntity) {
+    // Note: The strings (stop ID, trip ID, route ID) can be present but empty string.
+    // In those cases we want to ignore them. So we test if they are falsy, to cover
+    // empty string, undefined, or null.
+    //
+    // In contrast, the routeType enum uses 0 to mean tram, so we compare that against
+    // null/undefined rather than checking for truthiness, to make sure we don't ignore
+    // a value of 0.
 
-      // Not sure if this is the protobuf library's fault or gtfs-realtime-bindings' fault,
-      // but if no routeType is provided in the data, entity.routeType evaluates to 0, rather
-      // than null/undefined, despite the fact that route type 0 has a very different meaning
-      // (no route type means the alert affects all route types; route type 0 means the
-      // alert only affects trams). We have to work around this by using hasOwnProperty
-      if (
-        entity.hasOwnProperty('routeType')
-        && !routeTypesForThisAgency.has(entity.routeType)
-      ) {
-        return false;
-      }
-      return true;
-    });
-  });
+    // if entity includes stop ID, this leg must pass that stop
+    if (entity.stopId && leg.stops.every(stop => stop.stop_id !== entity.stopId))
+      continue;
 
-  // Format relevant alerts into plain JSONable objects using snake_case
-  routeResult.service_alerts = relevantAlerts.map(alert => ({
+    // if entity includes trip ID, this leg must use that trip
+    if (entity.trip?.tripId && leg.trip_id && leg.trip_id !== entity.trip.tripId)
+      continue;
+
+    // if entity includes route ID, this leg must use that route.
+    if (entity.routeId && leg.route_id !== entity.routeId)
+      continue;
+
+    if (entity.agencyId && leg.agency_id !== entity.agencyId)
+      continue;
+
+    // Not sure if this is the protobuf library's fault or gtfs-realtime-bindings' fault,
+    // but if no routeType is provided in the data, entity.routeType evaluates to 0, rather
+    // than null/undefined, despite the fact that route type 0 has a very different meaning
+    // (no route type means the alert affects all route types; route type 0 means the
+    // alert only affects trams). We have to work around this by using hasOwnProperty.
+    if (entity.hasOwnProperty('routeType') && entity.route_type !== entity.routeType)
+      continue;
+
+    // TODO: Support filtering out alerts with no trip_id, but a trip descriptor
+    // including a start time, and support filtering out alerts with a direction_id.
+    // For now those conditions are ignored, which may display irrelevant alerts.
+    //
+    // Other than that, we've tested every property that might filter out the alert,
+    // so this alert DOES appear to be relevant to this leg:
+    return true;
+  }
+}
+
+function _serializeAlert(alert) {
+  return {
     entities: alert.informedEntity.map(entity => ({
       stop_id: entity.stopId,
       trip_id: entity.trip?.tripId || null,
@@ -117,7 +93,7 @@ export function mergeAlertsIntoRoutes(alerts, routeResult) {
       route_id: entity.routeId,
       agency_id: entity.agencyId,
     })),
-    timeRanges: alert.activePeriod.map(timeRange => ({
+    time_ranges: alert.activePeriod.map(timeRange => ({
       start: 1000 * parseInt(timeRange.start, 10),
       end: 1000 * parseInt(timeRange.end, 10),
     })),
@@ -138,7 +114,5 @@ export function mergeAlertsIntoRoutes(alerts, routeResult) {
     severity_level: alert.severityLevel,
     // There are a few more possible fields we could add support for, like
     // url, tts_header_text, tts_description_text.
-  }));
-
-  return routeResult;
+  };
 }
