@@ -78,6 +78,12 @@ process.on('SIGINT', function() {
   process.exit(0);
 });
 
+process.on('SIGTERM', function() {
+  logger.info( "\nGracefully shutting down from SIGTERM (Ctrl-C)" );
+  // some other closing procedures go here
+  process.exit(0);
+});
+
 app.listen(port, () => {
   logger.info(`listening at http://localhost:${port}`)
 });
