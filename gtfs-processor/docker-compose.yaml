@@ -1,0 +1,24 @@
+services:
+  bikehopper-gtfs-processor:
+    container_name: bikehopper-gtfs-processor
+    deploy:
+      restart_policy:
+        condition: none
+      replicas: 1
+      resources:
+        limits:
+          memory: 256M
+        reservations:
+          memory: 128M
+    environment:
+      FILTERED_AGENCY_IDS: "${FILTERED_AGENCY_IDS}"
+      MANUALLY_FILTERED_ROUTE_IDS: "${MANUALLY_FILTERED_ROUTE_IDS}"
+      GTFS_PATH: "${GTFS_PATH}"
+      OUTPUT_DIR_PATH: "${OUTPUT_DIR_PATH}"
+    volumes:
+      - "${GTFS_PATH}:/usr/app/mnts/gtfs"
+      - "${OUTPUT_DIR_PATH}:/usr/app/mnts/output"
+    image: ghcr.io/bikehopper/gtfs-processor:v1.0.0
+    build: .
+version: '3.8'
+

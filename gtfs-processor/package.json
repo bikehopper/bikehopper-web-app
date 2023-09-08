@@ -10,6 +10,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@turf/bbox": "^6.5.0",
     "@turf/buffer": "^6.5.0",
     "@turf/center-of-mass": "^6.5.0",
     "@turf/convex": "^6.5.0",

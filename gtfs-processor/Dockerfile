@@ -1,5 +1,6 @@
 FROM node:20
 WORKDIR /app
+RUN apt-get update && apt-get install dumb-init
 COPY package.json /app
 COPY package-lock.json /app
 COPY ./src /app/src
