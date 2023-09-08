@@ -1,6 +1,5 @@
 import { expect, test, describe, vi } from 'vitest';
 const { filterRouteIds, filterTripIds, getInterestingStopIds, getInterestingStopsAsGeoJsonPoints } = require('./gtfs-helpers');
-const configs = require('./configs.json');
 const { PassThrough } = require('stream');
 
 vi.mock('node:fs/promises');
@@ -8,7 +7,7 @@ vi.mock('node:fs/promises');
 describe('#filterRouteIds', async () => {
   test('should select all the IDs that have a matching prefix', async () => {
     const mockReadable = new PassThrough();
-    const actualPromise = filterRouteIds(new Set(configs.filteredAgencyIds), new Set(configs.manuallyFilteredRouteIds), mockReadable);
+    const actualPromise = filterRouteIds(new Set(["CE", "AM"]), new Set(["ST:B"]), mockReadable);
 
     setTimeout(() => {
       mockReadable.emit('data', 'route_id,agency_id,route_short_name,route_long_name,route_desc,route_type,route_url,route_color,route_text_color,route_sort_order,continuous_pickup,continuous_drop_off,network_id,as_route\n');
