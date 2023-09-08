@@ -1,10 +1,28 @@
-const { createReadStream } = require('node:fs');
-const { writeFile } = require('node:fs/promises');
+const { createReadStream, createWriteStream, existsSync, mkdirSync } = require('node:fs');
+const { writeFile, mkdir } = require('node:fs/promises');
 const turfConvex = require('@turf/convex').default;
 const turfBuffer = require('@turf/buffer');
 const turfCenterOfMass = require('@turf/center-of-mass').default;
 const bbox = require('@turf/bbox').default;
+const unzipper = require("unzipper");
 const { filterRouteIds, filterTripIds, getInterestingStopIds, getInterestingStopsAsGeoJsonPoints } = require('./gtfs-helpers');
+
+const requiredGTFSFiles = new Set(['routes.txt', 'trips.txt', 'stop_times.txt', 'stops.txt']);
+
+async function unzip(src, dest) {
+  const zip = createReadStream(src).pipe(unzipper.Parse({forceStream: true}));
+  for await (const entry of zip) {
+    const fileName = entry.path;
+    if (requiredGTFSFiles.has(fileName)) {
+      if (!existsSync(dest)){
+        await mkdir(dest, { recursive: true });
+      }
+      entry.pipe(createWriteStream(`${dest}/${fileName}`));
+    } else {
+      entry.autodrain();
+    }
+  }
+}
 
 (async () => {
   // computes a polygon to define the "transit service area"
@@ -14,6 +32,9 @@ const { filterRouteIds, filterTripIds, getInterestingStopIds, getInterestingStop
   // for non-Bay Area regions, you will want to change the next few lines that
   // filter specific parts of the Bay Area transit data, but the rest of this
   // algorithm should be usable
+
+  // decompress GTFS zip
+  await unzip('/usr/app/mnts/gtfs.zip', '/usr/app/mnts/gtfs');
 
   // Bay Area: we want to filter out stops only served by ACE and Capitol
   // Corridor JPA since they go far outside the area we have local transit for

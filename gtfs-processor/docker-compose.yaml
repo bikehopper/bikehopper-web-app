@@ -16,7 +16,7 @@ services:
       GTFS_PATH: "${GTFS_PATH}"
       OUTPUT_DIR_PATH: "${OUTPUT_DIR_PATH}"
     volumes:
-      - "${GTFS_PATH}:/usr/app/mnts/gtfs"
+      - "${GTFS_PATH}:/usr/app/mnts/gtfs.zip"
       - "${OUTPUT_DIR_PATH}:/usr/app/mnts/output"
     image: ghcr.io/bikehopper/gtfs-processor:v1.0.1
     build: .
