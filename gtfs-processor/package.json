@@ -8,5 +8,14 @@
     "test": "vitest"
   },
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "@turf/buffer": "^6.5.0",
+    "@turf/center-of-mass": "^6.5.0",
+    "@turf/convex": "^6.5.0",
+    "csv-parse": "^5.5.0"
+  },
+  "devDependencies": {
+    "vitest": "^0.34.3"
+  }
 }
