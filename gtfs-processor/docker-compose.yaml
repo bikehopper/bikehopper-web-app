@@ -18,7 +18,7 @@ services:
     volumes:
       - "${GTFS_PATH}:/usr/app/mnts/gtfs"
       - "${OUTPUT_DIR_PATH}:/usr/app/mnts/output"
-    image: ghcr.io/bikehopper/gtfs-processor:v1.0.0
+    image: ghcr.io/bikehopper/gtfs-processor:v1.0.1
     build: .
 version: '3.8'
 
