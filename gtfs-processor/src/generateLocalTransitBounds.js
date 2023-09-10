@@ -71,9 +71,9 @@ async function unzip(src, dest) {
   const centerOfBufferedHull = turfCenterOfMass(bufferedHull);
   const boundingBox = bbox(bufferedHull);
 
-  const writingBBox = writeFile('/usr/app/mnts/output/bounding-box.json', JSON.stringify(boundingBox, null, 2));
-  const writingCArea = writeFile('/usr/app/mnts/output/center-area.json', JSON.stringify(centerOfBufferedHull, null, 2));
-  const writingBHull = writeFile('/usr/app/mnts/output/buffered-hull.json', JSON.stringify(bufferedHull, null, 2));
+  const writingBBox = writeFile('/usr/app/mnts/output/bounding-box.json', JSON.stringify(boundingBox, null, 2), 'utf8');
+  const writingCArea = writeFile('/usr/app/mnts/output/center-area.json', JSON.stringify(centerOfBufferedHull, null, 2), 'utf8');
+  const writingBHull = writeFile('/usr/app/mnts/output/buffered-hull.json', JSON.stringify(bufferedHull, null, 2), 'utf8');
 
   await Promise.all([writingBBox, writingCArea, writingBHull]);
 
