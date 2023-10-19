@@ -1,0 +1,44 @@
+services:
+  bikehopper-web-app:
+    container_name: bikehopper-web-app
+    restart: unless-stopped
+    deploy:
+      replicas: 1
+      resources:
+        limits:
+          memory: 512M
+        reservations:
+          memory: 256M
+    environment:
+      FILE_SERVICE_NAME: bikehopper-fit-file-server-svc
+      PORT: "${BIKEHOPPER_WEB_APP_PORT}"
+      HOSTNAME: svc.cluster.local
+      PHOTON_SERVICE_NAME: photon:2322
+      GRAPHHOPPER_SERVICE_NAME: graphhopper:8989
+      NODE_ENV: development
+      NOMINATIM_SERVICE_NAME: nominatim
+      NAMESPACE: "${NAMESPACE}"
+      GTFS_REALTIME_TOKEN: "${GTFS_REALTIME_TOKEN}"
+      BIKEHOPPER_WEB_APP_GEO_CONFIG_PATH: "${BIKEHOPPER_WEB_APP_GEO_CONFIG_PATH}"
+    healthcheck:
+      test: curl -f --silent http://localhost:${BIKEHOPPER_WEB_APP_PORT}/health
+      retries: 20
+      start_period: 5s
+      timeout: 2s
+    image: ghcr.io/bikehopper/bikehopper-web-app:v1.1.11
+    build: ../bikehopper-web-app/
+    labels:
+      - "app=bikehopper-web-app"
+      - "traefik.enable=true"
+      - "traefik.http.routers.bikehopper-web-app.rule=Host(`api.app.localhost`)"
+      - "traefik.http.routers.bikehopper-web-app.tls=true"
+    volumes:
+      - "${BIKEHOPPER_WEB_APP_GEO_CONFIG_HOST_PATH}:${BIKEHOPPER_WEB_APP_GEO_CONFIG_PATH}"
+    ports:
+    - "${BIKEHOPPER_WEB_APP_PORT}:${BIKEHOPPER_WEB_APP_PORT}"
+    depends_on:
+      photon:
+        condition: service_healthy
+      graphhopper:
+        condition: service_healthy
+version: '3.8'

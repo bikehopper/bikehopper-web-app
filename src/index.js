@@ -11,6 +11,7 @@ import { router as graphHopperRouter } from './graphhopper/index.js';
 import { router as photonRouter } from './photon/index.js';
 import { router as nominatimRouter } from './nominatim/index.js';
 import { router as fileRouter } from './file/index.js';
+import { router as geoConfigRouter } from './geoconfig/index.js';
 
 if (!satisfies(process.version, '>=18')) {
   console.error('ERROR: bikehopper-web-app requires node v18');
@@ -60,16 +61,28 @@ app.use((req, res, next) => {
   next();
 });
 
+// return instance specific configs (e.g. map center, bbox, etc...)
+app.use('/v1/config', geoConfigRouter);
+
+// generic API path so we don't have a leaky abstraction
+app.use('/v1/route', graphHopperRouter);
+
+// all routes that should be forwarded to photon
+app.use('/v1/geocode', photonRouter);
+
 // all routes that should be forwarded to graphhopper
+// TODO: remove in next release
 app.use('/v1/graphhopper', graphHopperRouter);
 
 // all routes that should be forwarded to photon
+// TODO: remove in next release
 app.use('/v1/photon', photonRouter);
 
 // all routes that should be forwarded to the fit file creator
 app.use('/v1/file', fileRouter);
 
 // all routes that should be forwarded to nominatim
+// TODO: remove in next release
 app.use('/v1/nominatim', nominatimRouter);
 
 process.on('SIGINT', function() {
