@@ -3,7 +3,8 @@ import photonClient from './client.js';
 import logger from '../lib/logger.js';
 
 const router = express.Router();
-router.get('/geocode', async (req, res) => {
+
+async function geocodeCb (req, res) {
   try {
     const resp = await photonClient.request({
       method: 'get',
@@ -20,7 +21,12 @@ router.get('/geocode', async (req, res) => {
     }
   }
   res.end();
-});
+}
+
+router.get('/', geocodeCb);
+
+// TODO: remove in next release
+router.get('/geocode', geocodeCb);
 
 router.get('/reverse', async (req, res) => {
   try {

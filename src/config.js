@@ -10,6 +10,7 @@ export const HOSTNAME = process.env.HOSTNAME;
 export const PHOTON_SERVICE_NAME = process.env.PHOTON_SERVICE_NAME;
 export const NOMINATIM_SERVICE_NAME = process.env.NOMINATIM_SERVICE_NAME;
 export const FILE_SERVICE_NAME = process.env.FILE_SERVICE_NAME;
+export const BIKEHOPPER_WEB_APP_GEO_CONFIG_PATH = process.env.BIKEHOPPER_WEB_APP_GEO_CONFIG_PATH;
 
 // Load .env files in a similar way to the bikehopper-ui frontend
 // .env.development.local, .env.development, .env, etc
