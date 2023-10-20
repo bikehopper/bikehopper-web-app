@@ -13,10 +13,10 @@ services:
     environment:
       FILTERED_AGENCY_IDS: "${FILTERED_AGENCY_IDS}"
       MANUALLY_FILTERED_ROUTE_IDS: "${MANUALLY_FILTERED_ROUTE_IDS}"
-      GTFS_PATH: "${GTFS_PATH}"
-      OUTPUT_DIR_PATH: "${OUTPUT_DIR_PATH}"
+      GTFS_ZIP_PATH: "/usr/app/mnts/gtfs.zip"
+      OUTPUT_DIR_PATH: "/usr/app/mnts/output"
     volumes:
-      - "${GTFS_PATH}:/usr/app/mnts/gtfs.zip"
+      - "${GTFS_ZIP_PATH}:/usr/app/mnts/gtfs.zip"
       - "${OUTPUT_DIR_PATH}:/usr/app/mnts/output"
     image: ghcr.io/bikehopper/gtfs-processor:v1.0.2
     build: .
