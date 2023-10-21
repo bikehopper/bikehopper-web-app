@@ -15,6 +15,7 @@
     "@turf/center-of-mass": "^6.5.0",
     "@turf/convex": "^6.5.0",
     "csv-parse": "^5.5.0",
+    "gtfs": "^4.5.0",
     "unzipper": "^0.10.14"
   },
   "devDependencies": {
