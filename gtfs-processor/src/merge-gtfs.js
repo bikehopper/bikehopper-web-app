@@ -1,5 +1,6 @@
 const { join, basename } = require('node:path');
 const { readdir } = require('node:fs/promises');
+const skipRecrodsWithError = process.env.SKIP_RECORDS_WITH_ERROR === 'true' || false;
 
 (async () => {
   const { importGtfs, exportGtfs } = await import('gtfs');
@@ -8,7 +9,7 @@ const { readdir } = require('node:fs/promises');
   const configBase = {
     agencies: [],
     "csvOptions": {
-      "skip_records_with_error": true
+      "skip_records_with_error": skipRecrodsWithError
     },
     "exportPath": "/usr/app/mnts/output/merged-gtfs"
   };

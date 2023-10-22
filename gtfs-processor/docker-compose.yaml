@@ -33,6 +33,8 @@ services:
           memory: 256M
         reservations:
           memory: 128M
+    environment:
+      SKIP_RECORDS_WITH_ERROR: "${SKIP_RECORDS_WITH_ERROR}"
     volumes:
       - "${HOST_GTFS_ZIPS_PATH}:/usr/app/mnts/gtfs-zips"
       - "${HOST_OUTPUT_DIR_PATH}:/usr/app/mnts/output"
