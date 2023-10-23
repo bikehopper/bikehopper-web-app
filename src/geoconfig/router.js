@@ -31,16 +31,13 @@ async function readGeoConfigs() {
 }
 
 router.get('/', async (req, res) => {
-  const geoConfigs = await readGeoConfigs();
+
   try {
+    const geoConfigs = await readGeoConfigs();
     res.json(geoConfigs);
   } catch (error) {
-    if (error.response) {
-      res.sendStatus(error.response.status);
-    }
-    else {
-      res.sendStatus(500);
-    }
+    console.error('failed to read geoconfig', error);
+    res.sendStatus(500);
   }
   res.end();
 });
