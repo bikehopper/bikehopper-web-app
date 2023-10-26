@@ -1,6 +1,7 @@
 import fs from 'fs';
 import * as dotenv from 'dotenv';
 import * as dotenvExpand from 'dotenv-expand';
+import { isEmpty } from 'ramda';
 
 export const PORT = Number(process.env.PORT);
 export const PROTOCOL = process.env.PROTOCOL;
@@ -10,6 +11,7 @@ export const HOSTNAME = process.env.HOSTNAME;
 export const PHOTON_SERVICE_NAME = process.env.PHOTON_SERVICE_NAME;
 export const NOMINATIM_SERVICE_NAME = process.env.NOMINATIM_SERVICE_NAME;
 export const FILE_SERVICE_NAME = process.env.FILE_SERVICE_NAME;
+export const WEB_APP_GEO_CONFIG_CONTAINER_PATH = isEmpty(process.env.WEB_APP_GEO_CONFIG_CONTAINER_PATH) ? process.env.WEB_APP_GEO_CONFIG_CONTAINER_PATH : '/mnt/geoconfig';
 
 // Load .env files in a similar way to the bikehopper-ui frontend
 // .env.development.local, .env.development, .env, etc
