@@ -63,27 +63,34 @@ app.use((req, res, next) => {
 
 // return instance specific configs (e.g. map center, bbox, etc...)
 app.use('/v1/config', geoConfigRouter);
+app.use('/api/v1/config', geoConfigRouter);
 
 // generic API path so we don't have a leaky abstraction
 app.use('/v1/route', graphHopperRouter);
+app.use('/api/v1/route', graphHopperRouter);
 
 // all routes that should be forwarded to photon
 app.use('/v1/geocode', photonRouter);
+app.use('/api/v1/geocode', photonRouter);
 
 // all routes that should be forwarded to graphhopper
 // TODO: remove in next release
 app.use('/v1/graphhopper', graphHopperRouter);
+app.use('/api/v1/graphhopper', graphHopperRouter);
 
 // all routes that should be forwarded to photon
 // TODO: remove in next release
 app.use('/v1/photon', photonRouter);
+app.use('/api/v1/photon', photonRouter);
 
 // all routes that should be forwarded to the fit file creator
 app.use('/v1/file', fileRouter);
+app.use('/api/v1/file', fileRouter);
 
 // all routes that should be forwarded to nominatim
 // TODO: remove in next release
 app.use('/v1/nominatim', nominatimRouter);
+app.use('/api/v1/nominatim', nominatimRouter);
 
 process.on('SIGINT', function() {
   logger.info( "\nGracefully shutting down from SIGINT (Ctrl-C)" );
