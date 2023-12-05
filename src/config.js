@@ -11,7 +11,10 @@ export const HOSTNAME = process.env.HOSTNAME;
 export const PHOTON_SERVICE_NAME = process.env.PHOTON_SERVICE_NAME;
 export const NOMINATIM_SERVICE_NAME = process.env.NOMINATIM_SERVICE_NAME;
 export const FILE_SERVICE_NAME = process.env.FILE_SERVICE_NAME;
-export const WEB_APP_GEO_CONFIG_CONTAINER_PATH = isEmpty(process.env.WEB_APP_GEO_CONFIG_CONTAINER_PATH) ? process.env.WEB_APP_GEO_CONFIG_CONTAINER_PATH : '/mnt/geoconfig';
+export const WEB_APP_GEO_CONFIG_FOLDER_CONTAINER_PATH = isEmpty(process.env.WEB_APP_GEO_CONFIG_FOLDER_CONTAINER_PATH) ? '/mnt/geoconfig' : process.env.WEB_APP_GEO_CONFIG_FOLDER_CONTAINER_PATH;
+export const SUPPORTED_REGION = process.env.SUPPORTED_REGION;
+export const WEB_APP_AGENCY_NAMES_FILE_CONTAINER_PATH = isEmpty(process.env.WEB_APP_AGENCY_NAMES_FILE_CONTAINER_PATH) ? '/mnt/agencies/names.json' : process.env.WEB_APP_AGENCY_NAMES_FILE_CONTAINER_PATH;
+export const WEB_APP_DATA_ACK_FILE_CONTAINER_PATH = isEmpty(process.env.WEB_APP_DATA_ACK_FILE_CONTAINER_PATH) ? '/mnt/acknowledgements/data.json' : process.env.WEB_APP_DATA_ACK_FILE_CONTAINER_PATH;
 
 // Load .env files in a similar way to the bikehopper-ui frontend
 // .env.development.local, .env.development, .env, etc
