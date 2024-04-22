@@ -1,4 +1,4 @@
-FROM node:18.12-alpine
+FROM node:20.12-alpine
 WORKDIR /app
 RUN apk --no-cache add curl dumb-init
 COPY package.json /app
