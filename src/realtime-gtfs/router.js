@@ -15,7 +15,44 @@ const tripUpdatesUrl = new URL(GTFS_REALTIME_TRIP_UPDATES_URL);
 
 const router = express.Router();
 
+function filterVehiclePositions(tripId, routeId, entities) {
+  const vehicleFilters = [{
+    key: 'TripId',
+    value: tripId
+  },
+  {
+    key: 'RouteId',
+    value: routeId
+  }].filter(vehicleFilter => vehicleFilter.value)
+
+  return vehicleFilters.reduce((entities, filter) => {
+    return entities
+      .filter(entity => entity.Vehicle.Trip)
+      .filter(entity => entity.Vehicle.Trip[filter.key] === filter.value);
+  }, entities);
+}
+
+function filterTripUpdates(tripId, routeId, entities) {
+  const vehicleFilters = [{
+    key: 'TripId',
+    value: tripId
+  },
+  {
+    key: 'RouteId',
+    value: routeId
+  }].filter(vehicleFilter => vehicleFilter.value)
+
+  return vehicleFilters.reduce((entities, filter) => {
+    return entities
+      .filter(entity => entity.TripUpdate.Trip)
+      .filter(entity => entity.TripUpdate.Trip[filter.key] === filter.value);
+  }, entities);
+}
+
 async function vehiclePositionsCb (req, res) {
+  const tripId = req.query.tripid;
+  const routeId = req.query.routeid;
+
   // try to get data from cache
   try {
     const cacheResult = await cache.get('vehiclePositions', {raw: true});
@@ -25,8 +62,8 @@ async function vehiclePositionsCb (req, res) {
         'Cache-Control': 'public, max-age=60',
         'Age': Math.floor((cacheResult.expires - Math.floor(new Date().getTime())) / 1000)
       });
-
-      res.json(cacheResult.value);
+      
+      res.json(filterVehiclePositions(tripId, routeId, cacheResult.value.Entity));
       return;
     }
   } catch (error) {
@@ -55,7 +92,7 @@ async function vehiclePositionsCb (req, res) {
       'Cache-Control': 'public, max-age=60',
       'Age': 0
     });
-    res.json(vehiclePositions);
+    res.json(filterVehiclePositions(tripId, routeId, vehiclePositions.Entity));
   } catch (error) {
     if (error.response) {
       res.sendStatus(error.response.status);
@@ -78,7 +115,7 @@ async function serviceAlertsCb (req, res) {
         'Age': Math.floor((cacheResult.expires - Math.floor(new Date().getTime())) / 1000)
       });
 
-      res.json(cacheResult.value);
+      res.json(cacheResult.value.Entity);
       return;
     }
   } catch (error) {
@@ -107,7 +144,7 @@ async function serviceAlertsCb (req, res) {
       'Cache-Control': 'public, max-age=60',
       'Age': 0
     });
-    res.json(serviceAlerts);
+    res.json(serviceAlerts.Entity);
   } catch (error) {
     if (error.response) {
       res.sendStatus(error.response.status);
@@ -120,6 +157,8 @@ async function serviceAlertsCb (req, res) {
 }
 
 async function tripUpdatesCb (req, res) {
+  const tripId = req.query.tripid;
+  const routeId = req.query.routeid;
   // try to get data from cache
   try {
     const cacheResult = await cache.get('tripUpdates', {raw: true});
@@ -130,7 +169,7 @@ async function tripUpdatesCb (req, res) {
         'Age': Math.floor((cacheResult.expires - Math.floor(new Date().getTime())) / 1000)
       });
 
-      res.json(cacheResult.value);
+      res.json(filterTripUpdates(tripId, routeId, cacheResult.value.Entity));
       return;
     }
   } catch (error) {
@@ -159,7 +198,7 @@ async function tripUpdatesCb (req, res) {
       'Cache-Control': 'public, max-age=60',
       'Age': 0
     });
-    res.json(tripUpdates);
+    res.json(filterTripUpdates(tripId, routeId, tripUpdates.Entity));
   } catch (error) {
     if (error.response) {
       res.sendStatus(error.response.status);
