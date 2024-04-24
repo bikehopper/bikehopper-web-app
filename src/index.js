@@ -12,6 +12,7 @@ import { router as photonRouter } from './photon/index.js';
 import { router as nominatimRouter } from './nominatim/index.js';
 import { router as fileRouter } from './file/index.js';
 import { router as geoConfigRouter } from './geoconfig/index.js';
+import { router as realtimeRouter } from './realtime-gtfs/index.js';
 
 if (!satisfies(process.version, '>=18')) {
   console.error('ERROR: bikehopper-web-app requires node v18');
@@ -64,6 +65,8 @@ app.use((req, res, next) => {
 // return instance specific configs (e.g. map center, bbox, etc...)
 app.use('/v1/config', geoConfigRouter);
 app.use('/api/v1/config', geoConfigRouter);
+
+app.use('/api/v1/realtime', realtimeRouter);
 
 // generic API path so we don't have a leaky abstraction
 app.use('/v1/route', graphHopperRouter);

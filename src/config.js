@@ -15,6 +15,7 @@ export const WEB_APP_GEO_CONFIG_FOLDER_CONTAINER_PATH = isEmpty(process.env.WEB_
 export const SUPPORTED_REGION = process.env.SUPPORTED_REGION;
 export const WEB_APP_AGENCY_NAMES_FILE_CONTAINER_PATH = isEmpty(process.env.WEB_APP_AGENCY_NAMES_FILE_CONTAINER_PATH) ? '/mnt/agencies/names.json' : process.env.WEB_APP_AGENCY_NAMES_FILE_CONTAINER_PATH;
 export const WEB_APP_DATA_ACK_FILE_CONTAINER_PATH = isEmpty(process.env.WEB_APP_DATA_ACK_FILE_CONTAINER_PATH) ? '/mnt/acknowledgements/data.json' : process.env.WEB_APP_DATA_ACK_FILE_CONTAINER_PATH;
+export const CACHE_CONN_STRING = isEmpty(process.env.CACHE_CONN_STRING) ? undefined : process.env.CACHE_CONN_STRING;
 
 // Load .env files in a similar way to the bikehopper-ui frontend
 // .env.development.local, .env.development, .env, etc
@@ -55,6 +56,8 @@ for (const dotenvFile of dotenvFiles) {
 
 export const GTFS_REALTIME_TOKEN = process.env.GTFS_REALTIME_TOKEN;
 export const GTFS_REALTIME_ALERTS_URL = process.env.GTFS_REALTIME_ALERTS_URL;
+export const GTFS_REALTIME_VEHICLE_POSITIONS_URL = process.env.GTFS_REALTIME_VEHICLE_POSITIONS_URL;
+export const GTFS_REALTIME_TRIP_UPDATES_URL = process.env.GTFS_REALTIME_TRIP_UPDATES_URL;
 
 // 511.org allows us 60 requests per hour, let's be conservative and
 // cache for 3min to make it a maximum of 20.
