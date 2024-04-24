@@ -2,6 +2,7 @@ import fs from 'fs';
 import * as dotenv from 'dotenv';
 import * as dotenvExpand from 'dotenv-expand';
 import { isEmpty } from 'ramda';
+import { URL } from 'node:url';
 
 export const PORT = Number(process.env.PORT);
 export const PROTOCOL = process.env.PROTOCOL;
@@ -54,10 +55,10 @@ for (const dotenvFile of dotenvFiles) {
   }
 }
 
-export const GTFS_REALTIME_TOKEN = process.env.GTFS_REALTIME_TOKEN;
-export const GTFS_REALTIME_ALERTS_URL = process.env.GTFS_REALTIME_ALERTS_URL;
-export const GTFS_REALTIME_VEHICLE_POSITIONS_URL = process.env.GTFS_REALTIME_VEHICLE_POSITIONS_URL;
-export const GTFS_REALTIME_TRIP_UPDATES_URL = process.env.GTFS_REALTIME_TRIP_UPDATES_URL;
+export const GTFS_REALTIME_TOKEN = isEmpty(process.env.GTFS_REALTIME_TOKEN) ? null : process.env.GTFS_REALTIME_TOKEN;
+export const GTFS_REALTIME_ALERTS_URL = isEmpty(process.env.GTFS_REALTIME_ALERTS_URL) ? null : new URL(process.env.GTFS_REALTIME_ALERTS_URL);
+export const GTFS_REALTIME_VEHICLE_POSITIONS_URL = isEmpty(process.env.GTFS_REALTIME_VEHICLE_POSITIONS_URL) ? null : new URL(process.env.GTFS_REALTIME_VEHICLE_POSITIONS_URL);
+export const GTFS_REALTIME_TRIP_UPDATES_URL = isEmpty(process.env.GTFS_REALTIME_TRIP_UPDATES_URL) ? null : new URL(process.env.GTFS_REALTIME_TRIP_UPDATES_URL);
 
 // 511.org allows us 60 requests per hour, let's be conservative and
 // cache for 3min to make it a maximum of 20.

@@ -51,6 +51,7 @@ async function _getAlertsNoCache() {
   const url = new URL(GTFS_REALTIME_ALERTS_URL);
   const usp = new URLSearchParams(url.search);
   usp.append('api_key', GTFS_REALTIME_TOKEN);
+  usp.delete('format', 'json');
   url.search = usp;
 
   const response = await fetch(url);

@@ -1,4 +1,3 @@
-import { URL } from 'node:url';
 import express from 'express';
 import realtimeClient from './client.js';
 import cache from '../lib/cache.js';
@@ -9,13 +8,57 @@ import {
   GTFS_REALTIME_TRIP_UPDATES_URL,
 } from '../config.js';
 
-const vehiclePositionsUrl = new URL(GTFS_REALTIME_VEHICLE_POSITIONS_URL);
-const serviceAlertsUrl = new URL(GTFS_REALTIME_ALERTS_URL);
-const tripUpdatesUrl = new URL(GTFS_REALTIME_TRIP_UPDATES_URL);
+const vehiclePositionsUrl = GTFS_REALTIME_VEHICLE_POSITIONS_URL;
+const serviceAlertsUrl = GTFS_REALTIME_ALERTS_URL;
+const tripUpdatesUrl = GTFS_REALTIME_TRIP_UPDATES_URL;
 
 const router = express.Router();
 
+function filterVehiclePositions(tripId, routeId, entities) {
+  const vehicleFilters = [{
+    key: 'TripId',
+    value: tripId
+  },
+  {
+    key: 'RouteId',
+    value: routeId
+  }].filter(vehicleFilter => vehicleFilter.value)
+
+  return vehicleFilters.reduce((entities, filter) => {
+    return entities
+      .filter(entity => entity.Vehicle.Trip)
+      .filter(entity => entity.Vehicle.Trip[filter.key] === filter.value);
+  }, entities);
+}
+
+function filterTripUpdates(tripId, routeId, entities) {
+  const vehicleFilters = [{
+    key: 'TripId',
+    value: tripId
+  },
+  {
+    key: 'RouteId',
+    value: routeId
+  }].filter(vehicleFilter => vehicleFilter.value)
+
+  return vehicleFilters.reduce((entities, filter) => {
+    return entities
+      .filter(entity => entity.TripUpdate.Trip)
+      .filter(entity => entity.TripUpdate.Trip[filter.key] === filter.value);
+  }, entities);
+}
+
 async function vehiclePositionsCb (req, res) {
+  const tripId = req.query.tripid;
+  const routeId = req.query.routeid;
+
+  if (!vehiclePositionsUrl) {
+    logger.info('env var GTFS_REALTIME_VEHICLE_POSITIONS_URL not found');
+    res.sendStatus(404);
+    res.end();
+    return;
+  }
+
   // try to get data from cache
   try {
     const cacheResult = await cache.get('vehiclePositions', {raw: true});
@@ -25,8 +68,8 @@ async function vehiclePositionsCb (req, res) {
         'Cache-Control': 'public, max-age=60',
         'Age': Math.floor((cacheResult.expires - Math.floor(new Date().getTime())) / 1000)
       });
-
-      res.json(cacheResult.value);
+      
+      res.json(filterVehiclePositions(tripId, routeId, cacheResult.value.Entity));
       return;
     }
   } catch (error) {
@@ -55,7 +98,7 @@ async function vehiclePositionsCb (req, res) {
       'Cache-Control': 'public, max-age=60',
       'Age': 0
     });
-    res.json(vehiclePositions);
+    res.json(filterVehiclePositions(tripId, routeId, vehiclePositions.Entity));
   } catch (error) {
     if (error.response) {
       res.sendStatus(error.response.status);
@@ -68,6 +111,13 @@ async function vehiclePositionsCb (req, res) {
 }
 
 async function serviceAlertsCb (req, res) {
+  if (!serviceAlertsUrl) {
+    logger.info('env var GTFS_REALTIME_ALERTS_URL not found');
+    res.sendStatus(404);
+    res.end();
+    return;
+  }
+
   // try to get data from cache
   try {
     const cacheResult = await cache.get('serviceAlerts', {raw: true});
@@ -78,7 +128,7 @@ async function serviceAlertsCb (req, res) {
         'Age': Math.floor((cacheResult.expires - Math.floor(new Date().getTime())) / 1000)
       });
 
-      res.json(cacheResult.value);
+      res.json(cacheResult.value.Entity);
       return;
     }
   } catch (error) {
@@ -107,7 +157,7 @@ async function serviceAlertsCb (req, res) {
       'Cache-Control': 'public, max-age=60',
       'Age': 0
     });
-    res.json(serviceAlerts);
+    res.json(serviceAlerts.Entity);
   } catch (error) {
     if (error.response) {
       res.sendStatus(error.response.status);
@@ -120,6 +170,16 @@ async function serviceAlertsCb (req, res) {
 }
 
 async function tripUpdatesCb (req, res) {
+  const tripId = req.query.tripid;
+  const routeId = req.query.routeid;
+
+  if (!tripUpdatesUrl) {
+    logger.info('env var GTFS_REALTIME_TRIP_UPDATES_URL not found');
+    res.sendStatus(404);
+    res.end();
+    return;
+  }
+
   // try to get data from cache
   try {
     const cacheResult = await cache.get('tripUpdates', {raw: true});
@@ -130,7 +190,7 @@ async function tripUpdatesCb (req, res) {
         'Age': Math.floor((cacheResult.expires - Math.floor(new Date().getTime())) / 1000)
       });
 
-      res.json(cacheResult.value);
+      res.json(filterTripUpdates(tripId, routeId, cacheResult.value.Entity));
       return;
     }
   } catch (error) {
@@ -159,7 +219,7 @@ async function tripUpdatesCb (req, res) {
       'Cache-Control': 'public, max-age=60',
       'Age': 0
     });
-    res.json(tripUpdates);
+    res.json(filterTripUpdates(tripId, routeId, tripUpdates.Entity));
   } catch (error) {
     if (error.response) {
       res.sendStatus(error.response.status);
@@ -171,19 +231,8 @@ async function tripUpdatesCb (req, res) {
   res.end();
 }
 
-// only add vehicle position endpoint if the GTFS_REALTIME_VEHICLE_POSITIONS_URL env var is set
-if (vehiclePositionsUrl) {
-  router.get('/vehiclepositions', vehiclePositionsCb);
-}
-
-// only add service alerts endpoint if the GTFS_REALTIME_ALERTS_URL env var is set
-if (serviceAlertsUrl) {
-  router.get('/servicealerts', serviceAlertsCb);
-}
-
-// only add trip updates endpoint if the GTFS_REALTIME_TRIP_UPDATES_URL env var is set
-if (tripUpdatesUrl) {
-  router.get('/tripupdates', tripUpdatesCb);
-}
+router.get('/vehiclepositions', vehiclePositionsCb);
+router.get('/servicealerts', serviceAlertsCb);
+router.get('/tripupdates', tripUpdatesCb);
 
 export default router;
