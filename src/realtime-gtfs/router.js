@@ -9,9 +9,9 @@ import {
   GTFS_REALTIME_TRIP_UPDATES_URL,
 } from '../config.js';
 
-const vehiclePositionsUrl = new URL(GTFS_REALTIME_VEHICLE_POSITIONS_URL);
-const serviceAlertsUrl = new URL(GTFS_REALTIME_ALERTS_URL);
-const tripUpdatesUrl = new URL(GTFS_REALTIME_TRIP_UPDATES_URL);
+const vehiclePositionsUrl = GTFS_REALTIME_VEHICLE_POSITIONS_URL ? new URL(GTFS_REALTIME_VEHICLE_POSITIONS_URL) : false;
+const serviceAlertsUrl = GTFS_REALTIME_ALERTS_URL ? new URL(GTFS_REALTIME_ALERTS_URL) : false;
+const tripUpdatesUrl = GTFS_REALTIME_TRIP_UPDATES_URL ? new URL(GTFS_REALTIME_TRIP_UPDATES_URL) : false;
 
 const router = express.Router();
 
