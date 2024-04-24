@@ -45,7 +45,8 @@ async function vehiclePositionsCb (req, res) {
 
     // cache result from upstream
     try {
-      await cache.set('vehiclePositions', resp.data, 60000); // cache for 60 seconds
+      const x = await cache.set('vehiclePositions', resp.data, 60000); // cache for 60 seconds
+      console.log(x);
     } catch (error) {
       logger.error(`cache error: ${error}`);
     }

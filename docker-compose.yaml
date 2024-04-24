@@ -47,9 +47,28 @@ services:
     ports:
       - 9229:9229
       - ${WEB_APP_CONTAINER_PORT}:${WEB_APP_CONTAINER_PORT}
-    # depends_on:
-    #   geoconfig-generator:
-    #     condition: service_completed_successfully
+    depends_on:
+      cache:
+        condition: service_started
+      # geoconfig-generator:
+      #   condition: service_completed_successfully
+
+  cache:
+    container_name: cache
+    image: eqalpha/keydb
+    ports:
+      - 6379:6379
+    volumes:
+      - ./keydb.conf:/etc/keydb/keydb.conf
+    deploy:
+      restart_policy:
+        condition: none
+      replicas: 1
+      resources:
+        limits:
+          memory: 256M
+        reservations:
+          memory: 128M
 
   # geoconfig-generator:
   #   container_name: geoconfig-generator
