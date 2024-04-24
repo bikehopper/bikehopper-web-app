@@ -10,8 +10,8 @@ import {
 } from '../config.js';
 
 const vehiclePositionsUrl = new URL(GTFS_REALTIME_VEHICLE_POSITIONS_URL);
-// const serviceAlertsUrl = new URL(GTFS_REALTIME_ALERTS_URL);
-// const tripUpdatesUrl = new URL(GTFS_REALTIME_TRIP_UPDATES_URL);
+const serviceAlertsUrl = new URL(GTFS_REALTIME_ALERTS_URL);
+const tripUpdatesUrl = new URL(GTFS_REALTIME_TRIP_UPDATES_URL);
 
 const router = express.Router();
 
@@ -23,7 +23,7 @@ async function vehiclePositionsCb (req, res) {
       res.header({
         'X-Cache-Hit': true,
         'Cache-Control': 'public, max-age=60',
-        'Age': (cacheResult.expires - Math.floor(new Date().getTime())) / 1000
+        'Age': Math.floor((cacheResult.expires - Math.floor(new Date().getTime())) / 1000)
       });
 
       res.json(cacheResult.value);
@@ -67,11 +67,123 @@ async function vehiclePositionsCb (req, res) {
   res.end();
 }
 
+async function serviceAlertsCb (req, res) {
+  // try to get data from cache
+  try {
+    const cacheResult = await cache.get('serviceAlerts', {raw: true});
+    if (cacheResult) {
+      res.header({
+        'X-Cache-Hit': true,
+        'Cache-Control': 'public, max-age=60',
+        'Age': Math.floor((cacheResult.expires - Math.floor(new Date().getTime())) / 1000)
+      });
+
+      res.json(cacheResult.value);
+      return;
+    }
+  } catch (error) {
+    logger.error(`cache error: ${error}`);
+  }
+  
+  // set cache header to false
+  res.header('X-Cache-Hit', 'false');
+  
+  // try to get data from realtime gtfs upstream
+  try {
+    const {data: serviceAlerts} = await realtimeClient.request({
+      method: 'get',
+      url: serviceAlertsUrl
+    });
+
+    // cache result from upstream
+    try {
+      await cache.set('serviceAlerts', serviceAlerts, 60000); // cache for 60 seconds
+    } catch (error) {
+      logger.error(`cache error: ${error}`);
+    }
+    
+    // set cache headers and send result
+    res.header({
+      'Cache-Control': 'public, max-age=60',
+      'Age': 0
+    });
+    res.json(serviceAlerts);
+  } catch (error) {
+    if (error.response) {
+      res.sendStatus(error.response.status);
+    }
+    else {
+      res.sendStatus(500);
+    }
+  }
+  res.end();
+}
+
+async function tripUpdatesCb (req, res) {
+  // try to get data from cache
+  try {
+    const cacheResult = await cache.get('tripUpdates', {raw: true});
+    if (cacheResult) {
+      res.header({
+        'X-Cache-Hit': true,
+        'Cache-Control': 'public, max-age=60',
+        'Age': Math.floor((cacheResult.expires - Math.floor(new Date().getTime())) / 1000)
+      });
+
+      res.json(cacheResult.value);
+      return;
+    }
+  } catch (error) {
+    logger.error(`cache error: ${error}`);
+  }
+  
+  // set cache header to false
+  res.header('X-Cache-Hit', 'false');
+  
+  // try to get data from realtime gtfs upstream
+  try {
+    const {data: tripUpdates} = await realtimeClient.request({
+      method: 'get',
+      url: tripUpdatesUrl
+    });
+
+    // cache result from upstream
+    try {
+      await cache.set('tripUpdates', tripUpdates, 60000); // cache for 60 seconds
+    } catch (error) {
+      logger.error(`cache error: ${error}`);
+    }
+    
+    // set cache headers and send result
+    res.header({
+      'Cache-Control': 'public, max-age=60',
+      'Age': 0
+    });
+    res.json(tripUpdates);
+  } catch (error) {
+    if (error.response) {
+      res.sendStatus(error.response.status);
+    }
+    else {
+      res.sendStatus(500);
+    }
+  }
+  res.end();
+}
+
 // only add vehicle position endpoint if the GTFS_REALTIME_VEHICLE_POSITIONS_URL env var is set
 if (vehiclePositionsUrl) {
   router.get('/vehiclepositions', vehiclePositionsCb);
 }
 
+// only add service alerts endpoint if the GTFS_REALTIME_ALERTS_URL env var is set
+if (serviceAlertsUrl) {
+  router.get('/servicealerts', serviceAlertsCb);
+}
 
+// only add trip updates endpoint if the GTFS_REALTIME_TRIP_UPDATES_URL env var is set
+if (tripUpdatesUrl) {
+  router.get('/tripupdates', tripUpdatesCb);
+}
 
 export default router;
