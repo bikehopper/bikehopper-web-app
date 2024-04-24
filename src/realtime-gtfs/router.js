@@ -38,15 +38,14 @@ async function vehiclePositionsCb (req, res) {
   
   // try to get data from realtime gtfs upstream
   try {
-    const resp = await realtimeClient.request({
+    const {data: vehiclePositions} = await realtimeClient.request({
       method: 'get',
       url: vehiclePositionsUrl
     });
 
     // cache result from upstream
     try {
-      const x = await cache.set('vehiclePositions', resp.data, 60000); // cache for 60 seconds
-      console.log(x);
+      await cache.set('vehiclePositions', vehiclePositions, 60000); // cache for 60 seconds
     } catch (error) {
       logger.error(`cache error: ${error}`);
     }
@@ -56,7 +55,7 @@ async function vehiclePositionsCb (req, res) {
       'Cache-Control': 'public, max-age=60',
       'Age': 0
     });
-    res.json(resp.data);
+    res.json(vehiclePositions);
   } catch (error) {
     if (error.response) {
       res.sendStatus(error.response.status);
