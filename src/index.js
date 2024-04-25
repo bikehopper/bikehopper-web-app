@@ -59,6 +59,7 @@ app.use((req, res, next) => {
     // for the other requests set strict no caching parameters
     res.set('Cache-Control', `no-store`);
   }
+  res.set('X-K8s-Namespace', process.env.NAMESPACE);
   next();
 });
 
