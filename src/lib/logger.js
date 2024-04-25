@@ -10,7 +10,7 @@ const logger = pino({
       translateTime: true,
     },
   } : null,
-  level: process.env.LOG_LEVEL ? process.env.LOG_LEVEL : 'info'
+  level: process.env.LOG_LEVEL || 'info'
 });
 
 export default logger;

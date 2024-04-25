@@ -63,6 +63,12 @@ app.use((req, res, next) => {
   next();
 });
 
+app.use((req, res, next) => {
+  logger.info('custom debugger logger');
+  logger.info(`${JSON.stringify(req)}`);
+  next();
+});
+
 // return instance specific configs (e.g. map center, bbox, etc...)
 app.use('/v1/config', geoConfigRouter);
 app.use('/api/v1/config', geoConfigRouter);
