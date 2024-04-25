@@ -53,6 +53,12 @@ async function vehiclePositionsCb (req, res) {
   const tripId = req.query.tripid;
   const routeId = req.query.routeid;
 
+  if (!vehiclePositionsUrl) {
+    res.sendStatus(404);
+    res.end();
+    return;
+  }
+
   // try to get data from cache
   try {
     const cacheResult = await cache.get('vehiclePositions', {raw: true});
@@ -105,6 +111,12 @@ async function vehiclePositionsCb (req, res) {
 }
 
 async function serviceAlertsCb (req, res) {
+  if (!serviceAlertsUrl) {
+    res.sendStatus(404);
+    res.end();
+    return;
+  }
+
   // try to get data from cache
   try {
     const cacheResult = await cache.get('serviceAlerts', {raw: true});
@@ -159,6 +171,13 @@ async function serviceAlertsCb (req, res) {
 async function tripUpdatesCb (req, res) {
   const tripId = req.query.tripid;
   const routeId = req.query.routeid;
+
+  if (!tripUpdatesUrl) {
+    res.sendStatus(404);
+    res.end();
+    return;
+  }
+
   // try to get data from cache
   try {
     const cacheResult = await cache.get('tripUpdates', {raw: true});
@@ -210,19 +229,8 @@ async function tripUpdatesCb (req, res) {
   res.end();
 }
 
-// only add vehicle position endpoint if the GTFS_REALTIME_VEHICLE_POSITIONS_URL env var is set
-if (vehiclePositionsUrl) {
-  router.get('/vehiclepositions', vehiclePositionsCb);
-}
-
-// only add service alerts endpoint if the GTFS_REALTIME_ALERTS_URL env var is set
-if (serviceAlertsUrl) {
-  router.get('/servicealerts', serviceAlertsCb);
-}
-
-// only add trip updates endpoint if the GTFS_REALTIME_TRIP_UPDATES_URL env var is set
-if (tripUpdatesUrl) {
-  router.get('/tripupdates', tripUpdatesCb);
-}
+router.get('/vehiclepositions', vehiclePositionsCb);
+router.get('/servicealerts', serviceAlertsCb);
+router.get('/tripupdates', tripUpdatesCb);
 
 export default router;
