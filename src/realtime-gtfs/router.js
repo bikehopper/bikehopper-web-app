@@ -1,4 +1,3 @@
-import { URL } from 'node:url';
 import express from 'express';
 import realtimeClient from './client.js';
 import cache from '../lib/cache.js';
@@ -9,9 +8,9 @@ import {
   GTFS_REALTIME_TRIP_UPDATES_URL,
 } from '../config.js';
 
-const vehiclePositionsUrl = GTFS_REALTIME_VEHICLE_POSITIONS_URL ? new URL(GTFS_REALTIME_VEHICLE_POSITIONS_URL) : false;
-const serviceAlertsUrl = GTFS_REALTIME_ALERTS_URL ? new URL(GTFS_REALTIME_ALERTS_URL) : false;
-const tripUpdatesUrl = GTFS_REALTIME_TRIP_UPDATES_URL ? new URL(GTFS_REALTIME_TRIP_UPDATES_URL) : false;
+const vehiclePositionsUrl = GTFS_REALTIME_VEHICLE_POSITIONS_URL;
+const serviceAlertsUrl = GTFS_REALTIME_ALERTS_URL;
+const tripUpdatesUrl = GTFS_REALTIME_TRIP_UPDATES_URL;
 
 const router = express.Router();
 
@@ -54,6 +53,7 @@ async function vehiclePositionsCb (req, res) {
   const routeId = req.query.routeid;
 
   if (!vehiclePositionsUrl) {
+    logger.info('env var GTFS_REALTIME_VEHICLE_POSITIONS_URL not found');
     res.sendStatus(404);
     res.end();
     return;
@@ -112,6 +112,7 @@ async function vehiclePositionsCb (req, res) {
 
 async function serviceAlertsCb (req, res) {
   if (!serviceAlertsUrl) {
+    logger.info('env var GTFS_REALTIME_ALERTS_URL not found');
     res.sendStatus(404);
     res.end();
     return;
@@ -173,6 +174,7 @@ async function tripUpdatesCb (req, res) {
   const routeId = req.query.routeid;
 
   if (!tripUpdatesUrl) {
+    logger.info('env var GTFS_REALTIME_TRIP_UPDATES_URL not found');
     res.sendStatus(404);
     res.end();
     return;
