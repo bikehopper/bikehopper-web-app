@@ -65,7 +65,7 @@ app.use((req, res, next) => {
 
 app.use((req, res, next) => {
   logger.info('custom debugger logger');
-  logger.info(`${JSON.stringify(req)}`);
+  console.log(req);
   next();
 });
 
