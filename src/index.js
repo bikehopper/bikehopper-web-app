@@ -73,6 +73,7 @@ app.use((req, res, next) => {
 app.use('/v1/config', geoConfigRouter);
 app.use('/api/v1/config', geoConfigRouter);
 
+app.use('/v1/realtime', realtimeRouter);
 app.use('/api/v1/realtime', realtimeRouter);
 
 // generic API path so we don't have a leaky abstraction
