@@ -12,7 +12,73 @@ const vehiclePositionsUrl = GTFS_REALTIME_VEHICLE_POSITIONS_URL;
 const serviceAlertsUrl = GTFS_REALTIME_ALERTS_URL;
 const tripUpdatesUrl = GTFS_REALTIME_TRIP_UPDATES_URL;
 
+const rootP = protobuf.load('../proto/gtfs-realtime.proto');
+
 const router = express.Router();
+
+function filterVehiclePositions(tripId, routeId, entities) {
+  const vehicleFilters = [{
+    key: 'TripId',
+    value: tripId
+  },
+  {
+    key: 'RouteId',
+    value: routeId
+  }].filter(vehicleFilter => vehicleFilter.value)
+
+  return vehicleFilters.reduce((entities, filter) => {
+    return entities
+      .filter(entity => entity.Vehicle.Trip)
+      .filter(entity => entity.Vehicle.Trip[filter.key] === filter.value);
+  }, entities.Entity);
+}
+
+function filterTripUpdates(tripId, routeId, entities) {
+  const vehicleFilters = [{
+    key: 'TripId',
+    value: tripId
+  },
+  {
+    key: 'RouteId',
+    value: routeId
+  }].filter(vehicleFilter => vehicleFilter.value)
+
+  return vehicleFilters.reduce((entities, filter) => {
+    return entities
+      .filter(entity => entity.TripUpdate.Trip)
+      .filter(entity => entity.TripUpdate.Trip[filter.key] === filter.value);
+  }, entities);
+}
+
+// ttl in ms
+async function cacheableRequest(ttl, url) {
+  try {
+    const cachedResult = await cache.get(url, {raw: true});
+
+    return {
+      value: cachedResult.value,
+      age: Math.floor((cacheResult.expires - Math.floor(new Date().getTime())) / 1000)
+    };
+  } catch (error) {
+    logger.warn(`cache error: ${error}`);
+  }
+  
+  const result = await realtimeClient.request({
+    method: 'get',
+    url: url
+  });
+
+  try {
+    await cache.set(url, result, ttl);
+  } catch (error) {
+    logger.error(`cache error: ${error}`);
+  }
+  
+  return {
+    value: result,
+    age: ttl / 1000
+  };
+}
 
 async function vehiclePositionsCb (req, res) {
   if (!vehiclePositionsUrl) {
@@ -21,6 +87,11 @@ async function vehiclePositionsCb (req, res) {
     res.end();
     return;
   }
+
+  const tripId = req.query.tripid;
+  const routeId = req.query.routeid;
+  const root = await rootP;
+  const VehiclePosition = root.lookupType('transit_realtime.VehiclePosition');
 
   // try to get data from cache
   try {
@@ -31,8 +102,16 @@ async function vehiclePositionsCb (req, res) {
         'Cache-Control': 'public, max-age=60',
         'Age': Math.floor((cacheResult.expires - Math.floor(new Date().getTime())) / 1000)
       });
-      
-      res.send(cacheResult.value);
+      // VehiclePosition
+      const vehiclePositionsAll = VehiclePosition.decode(Buffer.from(cacheResult.value));
+      // filter vehicles
+      const entries = filterVehiclePositions(tripId, routeId, vehiclePositionsAll);
+      const vehiclePositionsFiltered = {
+        ...vehiclePositionsAll,
+        ...entries,
+      };
+      const vehiclePositions = VehiclePosition.encode(vehiclePositionsFiltered).finish();
+      res.send(vehiclePositions);
       res.end();
       return;
     }
@@ -45,7 +124,7 @@ async function vehiclePositionsCb (req, res) {
   
   // try to get data from realtime gtfs upstream
   try {
-    const {data: vehiclePositions} = await realtimeClient.request({
+    const {data: vehiclePositionsBuff} = await realtimeClient.request({
       method: 'get',
       url: vehiclePositionsUrl
     });
@@ -56,12 +135,22 @@ async function vehiclePositionsCb (req, res) {
     } catch (error) {
       logger.error(`cache error: ${error}`);
     }
-    
+
     // set cache headers and send result
     res.header({
       'Cache-Control': 'public, max-age=60',
       'Age': 0
     });
+
+    // VehiclePosition
+    const vehiclePositionsAll = VehiclePosition.decode(Buffer.from(vehiclePositionsBuff));
+    // filter vehicles
+    const entries = filterVehiclePositions(tripId, routeId, vehiclePositionsAll);
+    const vehiclePositionsFiltered = {
+      ...vehiclePositionsAll,
+      ...entries,
+    };
+    const vehiclePositions = VehiclePosition.encode(vehiclePositionsFiltered).finish();
     res.send(vehiclePositions);
   } catch (error) {
     if (error.response) {
