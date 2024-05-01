@@ -1,4 +1,5 @@
 import express from 'express';
+import { checkSchema, validationResult } from 'express-validator';
 import realtimeClient from './client.js';
 import cache from '../lib/cache.js';
 import logger from '../lib/logger.js';
@@ -17,21 +18,45 @@ const tripUpdatesUrl = GTFS_REALTIME_TRIP_UPDATES_URL;
 
 const router = express.Router();
 
+const validateQueryParams = () => checkSchema({
+  'trip-id': {
+    optional: true,
+    isLength: {
+      options: { 
+        min: 3,
+        max: 32
+      },
+    },
+  },
+  'route-id': {
+    optional: true,
+    isLength: {
+      options: { 
+        min: 3,
+        max: 32
+      },
+    },
+  }
+}, ['query']);
+
 function filterVehiclePositions(tripId, routeId, entities) {
-  const vehicleFilters = [{
-    key: 'TripId',
+  const filters = [{
+    key: 'tripId',
     value: tripId
   },
   {
-    key: 'RouteId',
+    key: 'routeId',
     value: routeId
-  }].filter(vehicleFilter => vehicleFilter.value)
+  }].filter(filter => filter.value);
 
-  return vehicleFilters.reduce((entities, filter) => {
-    return entities
-      .filter(entity => entity.Vehicle.Trip)
-      .filter(entity => entity.Vehicle.Trip[filter.key] === filter.value);
-  }, entities.Entity);
+  return entities
+    .filter(entity => {
+      if (!entity.vehicle) return false;
+      if (!entity.vehicle.trip) return false;
+      return filters.every(filter => {
+        return entity.vehicle.trip[filter.key] === filter.value;
+      });
+    });
 }
 
 function filterTripUpdates(tripId, routeId, entities) {
@@ -89,6 +114,14 @@ async function vehiclePositionsCb (req, res) {
     return;
   }
 
+  const validatationResult = validationResult(req);
+  if (!validatationResult.isEmpty()) {
+    res.header('Cache-Control', 'no-store');
+    res.status(400);
+    res.json({ errors: validatationResult.array() });
+    return;
+  }
+
   res.header('Cache-Control', 'max-age=60, public');
   
   // get data from realtime gtfs upstream
@@ -121,8 +154,8 @@ async function vehiclePositionsCb (req, res) {
   }
 
   const vehiclePositionsFiltered = {
-    ...vehiclePositionsAll,
-    ...filterVehiclePositions(req.query.tripid, req.query.routeid, vehiclePositionsAll),
+    header: vehiclePositionsAll.header,
+    entity: filterVehiclePositions(req.query['trip-id'], req.query['route-id'], vehiclePositionsAll.entity),
   };
 
   // send response in correct format
@@ -263,7 +296,7 @@ async function tripUpdatesCb (req, res) {
   res.end();
 }
 
-router.get('/vehiclepositions', vehiclePositionsCb);
+router.get('/vehiclepositions', validateQueryParams(), vehiclePositionsCb);
 router.get('/servicealerts', serviceAlertsCb);
 router.get('/tripupdates', tripUpdatesCb);
 
