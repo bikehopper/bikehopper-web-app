@@ -8,6 +8,7 @@
     "build": "docker build -q -f Dockerfile.dev -t bikehopper-app:dev .",
     "start": "npm run build && docker run -p 3001:3001 -p 9229:9229 -e PROTOCAL=https -e GRAPHHOPPER_SERVICE_NAME=api.bikehopper -e PHOTON_SERVICE_NAME=api.bikehopper -e NOMINATIM_SERVICE_NAME=api.bikehopper -e FILE_SERVICE_NAME=api.bikehopper -e NAMESPACE=staging -e HOSTNAME=techlabor.org/v1 -e NODE_ENV=development --rm -it bikehopper-app:dev",
     "start-nodocker": "NODE_ENV=development PROTOCOL=http GRAPHHOPPER_SERVICE_NAME=localhost:8989 NAMESPACE= HOSTNAME= PORT=3001 node --inspect=127.0.0.1:9229 src/index.js",
+    "start-nodemon": "docker compose up --build bikehopper-web-app",
     "test": "npm t"
   },
   "author": "Andy McCoy",
@@ -30,7 +31,9 @@
     "pino": "^8.7.0",
     "pino-http": "^8.2.1",
     "pino-http-print": "^3.1.0",
-    "protobufjs": "^7.2.6",
     "ramda": "^0.29.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.0"
   }
 }

@@ -7,7 +7,7 @@ const client = axios.create({
   timeout: 2000,
   params: {
     api_key: GTFS_REALTIME_TOKEN
-  }
+  },
 });
 
 export default client;

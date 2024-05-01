@@ -7,12 +7,13 @@ import {
   GTFS_REALTIME_VEHICLE_POSITIONS_URL,
   GTFS_REALTIME_TRIP_UPDATES_URL,
 } from '../config.js';
+import GtfsRealtimeBindings from 'gtfs-realtime-bindings';
+
+// const root = await protobuf.load('src/proto/gtfs-realtime.proto');
 
 const vehiclePositionsUrl = GTFS_REALTIME_VEHICLE_POSITIONS_URL;
 const serviceAlertsUrl = GTFS_REALTIME_ALERTS_URL;
 const tripUpdatesUrl = GTFS_REALTIME_TRIP_UPDATES_URL;
-
-const rootP = protobuf.load('../proto/gtfs-realtime.proto');
 
 const router = express.Router();
 
@@ -53,29 +54,29 @@ function filterTripUpdates(tripId, routeId, entities) {
 // ttl in ms
 async function cacheableRequest(ttl, url) {
   try {
-    const cachedResult = await cache.get(url, {raw: true});
-
-    return {
-      value: cachedResult.value,
-      age: Math.floor((cacheResult.expires - Math.floor(new Date().getTime())) / 1000)
-    };
+    const cachedData = await cache.get(url, {raw: true});
+    if (cachedData) {
+      return {
+        value: cachedData.value,
+        age: Math.floor((cachedData.expires - Math.floor(new Date().getTime())) / 1000)
+      };
+    }
   } catch (error) {
     logger.warn(`cache error: ${error}`);
   }
   
-  const result = await realtimeClient.request({
-    method: 'get',
-    url: url
+  const {data: value} = await realtimeClient.get(url, {
+    responseType: 'arraybuffer'
   });
 
   try {
-    await cache.set(url, result, ttl);
+    await cache.set(url, value, ttl);
   } catch (error) {
     logger.error(`cache error: ${error}`);
   }
   
   return {
-    value: result,
+    value,
     age: ttl / 1000
   };
 }
@@ -88,77 +89,56 @@ async function vehiclePositionsCb (req, res) {
     return;
   }
 
-  const tripId = req.query.tripid;
-  const routeId = req.query.routeid;
-  const root = await rootP;
-  const VehiclePosition = root.lookupType('transit_realtime.VehiclePosition');
-
-  // try to get data from cache
-  try {
-    const cacheResult = await cache.get('vehiclePositions', {raw: true});
-    if (cacheResult) {
-      res.header({
-        'X-Cache-Hit': true,
-        'Cache-Control': 'public, max-age=60',
-        'Age': Math.floor((cacheResult.expires - Math.floor(new Date().getTime())) / 1000)
-      });
-      // VehiclePosition
-      const vehiclePositionsAll = VehiclePosition.decode(Buffer.from(cacheResult.value));
-      // filter vehicles
-      const entries = filterVehiclePositions(tripId, routeId, vehiclePositionsAll);
-      const vehiclePositionsFiltered = {
-        ...vehiclePositionsAll,
-        ...entries,
-      };
-      const vehiclePositions = VehiclePosition.encode(vehiclePositionsFiltered).finish();
-      res.send(vehiclePositions);
-      res.end();
-      return;
-    }
-  } catch (error) {
-    logger.error(`cache error: ${error}`);
-  }
+  res.header('Cache-Control', 'max-age=60, public');
   
-  // set cache header to false
-  res.header('X-Cache-Hit', 'false');
-  
-  // try to get data from realtime gtfs upstream
+  // get data from realtime gtfs upstream
+  let vehiclePosition;
   try {
-    const {data: vehiclePositionsBuff} = await realtimeClient.request({
-      method: 'get',
-      url: vehiclePositionsUrl
-    });
-
-    // cache result from upstream
-    try {
-      await cache.set('vehiclePositions', vehiclePositions, 60000); // cache for 60 seconds
-    } catch (error) {
-      logger.error(`cache error: ${error}`);
-    }
-
-    // set cache headers and send result
-    res.header({
-      'Cache-Control': 'public, max-age=60',
-      'Age': 0
-    });
-
-    // VehiclePosition
-    const vehiclePositionsAll = VehiclePosition.decode(Buffer.from(vehiclePositionsBuff));
-    // filter vehicles
-    const entries = filterVehiclePositions(tripId, routeId, vehiclePositionsAll);
-    const vehiclePositionsFiltered = {
-      ...vehiclePositionsAll,
-      ...entries,
-    };
-    const vehiclePositions = VehiclePosition.encode(vehiclePositionsFiltered).finish();
-    res.send(vehiclePositions);
+    vehiclePosition = await cacheableRequest(60000, vehiclePositionsUrl);
   } catch (error) {
+    logger.error(`error fetching vehicle positions ${error}`);
+    res.header('Cache-Control', 'no-store');
     if (error.response) {
       res.sendStatus(error.response.status);
     }
     else {
       res.sendStatus(500);
     }
+    return;
+  }
+
+  // decode and filter data
+  let vehiclePositionsAll;
+  try {
+    vehiclePositionsAll = GtfsRealtimeBindings.transit_realtime.FeedMessage.decode(
+      Buffer.from(vehiclePosition.value)
+    );
+  } catch (error) {
+    logger.error(`Error decoding vehicle position protobuff: ${error}`);
+    res.header('Cache-Control', 'no-store');
+    res.sendStatus(500);
+    return;
+  }
+
+  const vehiclePositionsFiltered = {
+    ...vehiclePositionsAll,
+    ...filterVehiclePositions(req.query.tripid, req.query.routeid, vehiclePositionsAll),
+  };
+
+  // send response in correct format
+  res.header('Age', vehiclePosition.age);
+  switch(req.accepts(['application/x-protobuf', 'application/json'])) {
+    case 'application/x-protobuf':
+      const encodedProtoBuf = GtfsRealtimeBindings.transit_realtime.FeedMessage.encode(vehiclePositionsFiltered).finish();
+      res.header('Content-Type', 'application/x-protobuf');
+      res.send(encodedProtoBuf);
+      break;
+    case 'application/json':
+      res.json(vehiclePositionsFiltered);
+      break;
+    default: // 400 must use Accepts header
+      res.sendStatus(400);
+      break;
   }
   res.end();
 }
