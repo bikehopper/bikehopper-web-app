@@ -47,16 +47,18 @@ function filterVehiclePositions(tripId, routeId, entities) {
   {
     key: 'routeId',
     value: routeId
-  }].filter(filter => filter.value);
+  }].filter(filter => filter.value?.length);
 
-  return entities
-    .filter(entity => {
-      if (!entity.vehicle) return false;
-      if (!entity.vehicle.trip) return false;
-      return filters.every(filter => {
-        return entity.vehicle.trip[filter.key] === filter.value;
+  if (filters.length === 0) return entities;
+
+  return filters.flatMap(filter => {
+    return entities
+      .filter(entity => {
+        if (!entity.vehicle) return false;
+        if (!entity.vehicle.trip) return false;
+        return filter.value.includes(entity.vehicle.trip[filter.key]);
       });
-    });
+  });
 }
 
 function filterTripUpdates(tripId, routeId, entities) {
@@ -140,7 +142,7 @@ async function vehiclePositionsCb (req, res) {
     return;
   }
 
-  // decode and filter data
+  // decode protobuffer
   let vehiclePositionsAll;
   try {
     vehiclePositionsAll = GtfsRealtimeBindings.transit_realtime.FeedMessage.decode(
@@ -153,6 +155,7 @@ async function vehiclePositionsCb (req, res) {
     return;
   }
 
+  // filter undesired trips/routes
   const vehiclePositionsFiltered = {
     header: vehiclePositionsAll.header,
     entity: filterVehiclePositions(req.query['trip-id'], req.query['route-id'], vehiclePositionsAll.entity),
