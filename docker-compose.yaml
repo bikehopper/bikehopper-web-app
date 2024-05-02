@@ -1,14 +1,14 @@
 services:
+  static:
+    container_name: static-content
+    image: nginx
+    ports:
+      - 8765:80
+    volumes:
+      - ./volumes/static:/usr/share/nginx/html
   bikehopper-web-app:
     container_name: bikehopper-web-app
     restart: unless-stopped
-    deploy:
-      replicas: 1
-      resources:
-        limits:
-          memory: 512M
-        reservations:
-          memory: 256M
     env_file:
       - path: ./.env
         required: true
@@ -41,17 +41,13 @@ services:
       - "traefik.http.routers.bikehopper-web-app.rule=Host(`api.app.localhost`)"
       - "traefik.http.routers.bikehopper-web-app.tls=true"
     volumes:
+      - ".:/app"
       - "${WEB_APP_GEO_CONFIG_HOST_PATH}:${WEB_APP_GEO_CONFIG_FOLDER_CONTAINER_PATH}"
       - "${WEB_APP_AGENCY_NAMES_FILE_HOST_PATH}:${WEB_APP_AGENCY_NAMES_FOLDER_CONTAINER_PATH}"
       # - "${WEB_APP_DATA_ACK_FILE_HOST_PATH}:${WEB_APP_DATA_ACK_FOLDER_CONTAINER_PATH}"
     ports:
       - 9229:9229
       - ${WEB_APP_CONTAINER_PORT}:${WEB_APP_CONTAINER_PORT}
-    depends_on:
-      cache:
-        condition: service_started
-      geoconfig-generator:
-        condition: service_completed_successfully
 
   cache:
     container_name: cache
