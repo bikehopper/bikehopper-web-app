@@ -2,6 +2,7 @@ import GtfsRealtimeBindings from 'gtfs-realtime-bindings';
 import logger from '../lib/logger.js';
 import {
   GTFS_REALTIME_TOKEN,
+  GTFS_REALTIME_SERVICE_ALERTS_TOKEN,
   GTFS_REALTIME_ALERTS_URL,
   ALERTS_CACHE_TIME_MSEC,
 } from '../config.js';
@@ -16,7 +17,7 @@ export async function getAlerts() {
     return _alertsCache;
   }
 
-  if (!GTFS_REALTIME_TOKEN) {
+  if (!GTFS_REALTIME_TOKEN && !GTFS_REALTIME_SERVICE_ALERTS_TOKEN) {
     logger.warn('no API key defined, cannot fetch alerts');
     return null;
   }
@@ -50,7 +51,7 @@ async function _getAlertsNoCache() {
   // that 511.org does, requiring it in the URL.
   const url = new URL(GTFS_REALTIME_ALERTS_URL);
   const usp = new URLSearchParams(url.search);
-  usp.append('api_key', GTFS_REALTIME_TOKEN);
+  usp.append('api_key', GTFS_REALTIME_SERVICE_ALERTS_TOKEN || GTFS_REALTIME_TOKEN);
   usp.delete('format', 'json');
   url.search = usp;
 

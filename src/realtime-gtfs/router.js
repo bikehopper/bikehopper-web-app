@@ -1,6 +1,6 @@
 import express from 'express';
 import { checkSchema, validationResult } from 'express-validator';
-import realtimeClient from './client.js';
+import { vehiclePositionClient, tripUpdateClient } from './client.js';
 import cache from '../lib/cache.js';
 import logger from '../lib/logger.js';
 import {
@@ -82,10 +82,11 @@ function filterTripUpdates(tripId, routeId, entities) {
 }
 
 // ttl in ms
-async function cacheableRequest(ttl, url) {
+async function cacheableRequest(ttl, url, client) {
   try {
     const cachedData = await cache.get(url, {raw: true});
     if (cachedData) {
+      logger.debug(`cache hit: ${url}`);
       return {
         value: cachedData.value,
         age: Math.floor((cachedData.expires - Math.floor(new Date().getTime())) / 1000)
@@ -95,8 +96,8 @@ async function cacheableRequest(ttl, url) {
     logger.warn(`cache error: ${error}`);
   }
   
-  const {data: value} = await realtimeClient.get(url, {
-    responseType: 'arraybuffer'
+  const {data: value} = await client.get(url, {
+    responseType: 'arraybuffer',
   });
 
   try {
@@ -132,7 +133,7 @@ async function vehiclePositionsCb (req, res) {
   // get data from realtime gtfs upstream
   let vehiclePosition;
   try {
-    vehiclePosition = await cacheableRequest(60000, vehiclePositionsUrl);
+    vehiclePosition = await cacheableRequest(60000, vehiclePositionsUrl, vehiclePositionClient);
   } catch (error) {
     logger.error(`error fetching vehicle positions ${error}`);
     res.header('Cache-Control', 'no-store');
@@ -203,7 +204,7 @@ async function tripUpdatesCb (req, res) {
   // get data from realtime gtfs upstream
   let tripUpdates;
   try {
-    tripUpdates = await cacheableRequest(60000, tripUpdatesUrl);
+    tripUpdates = await cacheableRequest(60000, tripUpdatesUrl, tripUpdateClient);
   } catch (error) {
     logger.error(`error fetching trip updates ${error}`);
     res.header('Cache-Control', 'no-store');
