@@ -120,11 +120,11 @@ async function vehiclePositionsCb (req, res) {
     return;
   }
 
-  const validatationResult = validationResult(req);
-  if (!validatationResult.isEmpty()) {
+  const validations = validationResult(req);
+  if (!validations.isEmpty()) {
     res.header('Cache-Control', 'no-store');
     res.status(400);
-    res.json({ errors: validatationResult.array() });
+    res.json({ errors: validations.array() });
     return;
   }
 
