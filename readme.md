@@ -24,7 +24,7 @@ The routing api is available at `curl localhost:3001/v1/graphhopper/<route>`.
 
 ## Routes
 
-These routes are exposed via Graphhopper and accessible from this app. They are the routes this app proxies.
+These routes are exposed via GraphHopper and accessible from this app. They are the routes this app proxies.
 - GET     /health node app health check
 - GET     /v1/graphhopper (com.graphhopper.application.resources.RootResource)
 - GET     /v1/graphhopper/health (com.graphhopper.resources.HealthcheckResource)

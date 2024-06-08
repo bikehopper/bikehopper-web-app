@@ -1,7 +1,7 @@
 {
   "name": "bikehopper-app",
   "version": "0.1.0",
-  "description": "Bikehopper application server",
+  "description": "BikeHopper application server",
   "main": "src/index.js",
   "type": "module",
   "scripts": {
