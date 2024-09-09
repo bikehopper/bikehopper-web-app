@@ -23,13 +23,28 @@ router.get('/route-pt', async (req, res) => {
       method: 'get',
       url: req.url,
     });
+    const bikeRoutePromise = graphHopperClient.post('/route', {
+      profile: 'bike2',
+      locale: 'en-US',
+      elevation: true,
+      useMiles: false,
+      layer: 'OpenStreetMap',
+      pointsEncoded: false,
+      details: ['cycleway', 'road_class', 'street_name'],
+      points: req.query.point.map(latlng => latlng.split(',').reverse().map(point => parseFloat(point))) // turning [['1.2,3.4'],['5.6,7.8']] -> [[3.4, 1.2], [7.8, 5.6]]
+    });
 
-    const [alertResult, graphHopperResult] = await Promise.allSettled([
-      alertPromise, graphHopperPromise
+    const [alertResult, graphHopperResult, bikeRouteResult] = await Promise.allSettled([
+      alertPromise, graphHopperPromise, bikeRoutePromise
     ]);
 
     if (graphHopperResult.status === 'rejected') throw graphHopperResult.reason;
     if (alertResult.status === 'rejected') logger.error(alertResult.reason);
+    if (bikeRouteResult.status === 'rejected') logger.error(bikeRouteResult.reason.message);
+
+    if (bikeRouteResult.status !== 'rejected' && bikeRouteResult.value?.data?.paths) {
+      graphHopperResult.value.data.paths.push(...bikeRouteResult.value.data.paths);
+    }
 
     res.json(mergeAlertsIntoRoutes(alertResult.value, graphHopperResult.value.data));
   } catch (error) {
@@ -66,7 +81,7 @@ passthruRoutes.forEach(([method, path]) => {
   router[method](path, async (req, res) => {
     try {
       const resp = await graphHopperClient.request({
-        method: req.method.toLowerCase(),
+        method: method,
         url: req.url
       });
       res.send(resp.data);

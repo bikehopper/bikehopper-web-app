@@ -15,7 +15,7 @@ import { router as geoConfigRouter } from './geoconfig/index.js';
 import { router as realtimeRouter } from './realtime-gtfs/index.js';
 
 if (!satisfies(process.version, '>=18')) {
-  console.error('ERROR: bikehopper-web-app requires node v18');
+  console.error('ERROR: bikehopper-web-app requires node v18+');
   process.exit(1);
 }
 

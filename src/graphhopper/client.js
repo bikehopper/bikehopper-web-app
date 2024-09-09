@@ -2,8 +2,6 @@ import axios from 'axios';
 import {
   PROTOCOL,
   GRAPHHOPPER_SERVICE_NAME,
-  HOSTNAME,
-  NAMESPACE
 } from '../config.js';
 
 const client = axios.create({

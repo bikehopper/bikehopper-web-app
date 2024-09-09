@@ -1,11 +1,12 @@
 services:
   static:
-    container_name: static-content
+    container_name: static
     image: nginx
     ports:
       - 8765:80
     volumes:
       - ./volumes/static:/usr/share/nginx/html
+  
   bikehopper-web-app:
     container_name: bikehopper-web-app
     restart: unless-stopped
@@ -17,7 +18,6 @@ services:
       PORT: "${WEB_APP_CONTAINER_PORT}"
       HOSTNAME: svc.cluster.local
       PHOTON_SERVICE_NAME: photon:2322
-      GRAPHHOPPER_SERVICE_NAME: graphhopper:8989
       NODE_ENV: development
       NOMINATIM_SERVICE_NAME: nominatim
       NAMESPACE: "${NAMESPACE}"
@@ -48,7 +48,10 @@ services:
     ports:
       - 9229:9229
       - ${WEB_APP_CONTAINER_PORT}:${WEB_APP_CONTAINER_PORT}
-
+    depends_on:
+      - cache
+      - static
+  
   cache:
     container_name: cache
     image: eqalpha/keydb
