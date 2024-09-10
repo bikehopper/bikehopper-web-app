@@ -81,7 +81,7 @@ router.get('/', async (req, res) => {
         ...result.value
       }
     }, {
-      supprtedRegion: SUPPORTED_REGION
+      supportedRegion: SUPPORTED_REGION
     });
 
   res.json(responseConfig);
