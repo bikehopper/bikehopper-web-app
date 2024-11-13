@@ -2,8 +2,6 @@ const { createReadStream, createWriteStream } = require('node:fs');
 const { writeFile, mkdtemp, rm } = require('node:fs/promises');
 const turfConvex = require('@turf/convex').default;
 const turfBuffer = require('@turf/buffer').default;
-const turfCenterOfMass = require('@turf/center-of-mass').default;
-const bbox = require('@turf/bbox').default;
 const unzipper = require("unzipper");
 const { resolve, join, basename} = require("path");
 const { tmpdir } = require('node:os');
@@ -79,16 +77,14 @@ async function unzip(src, dest) {
 
   const convexHull = turfConvex(interestingStopsCollection);
   const bufferedHull = turfBuffer(convexHull, 5, {units: 'miles'});
-  const centerOfBufferedHull = turfCenterOfMass(bufferedHull);
-  const boundingBox = bbox(bufferedHull);
 
   const outputPath = resolve(process.env.OUTPUT_DIR_PATH);
 
-  const writingBBox = writeFile(resolve(outputPath, 'bounding-box.json'), JSON.stringify(boundingBox, null, 2), 'utf8');
-  const writingCArea = writeFile(resolve(outputPath, 'center-area.json'), JSON.stringify(centerOfBufferedHull, null, 2), 'utf8');
-  const writingBHull = writeFile(resolve(outputPath, 'buffered-hull.json'), JSON.stringify(bufferedHull, null, 2), 'utf8');
-
-  await Promise.all([writingBBox, writingCArea, writingBHull]);
+  await writeFile(
+    resolve(outputPath, 'transit-service-area.json'),
+    JSON.stringify(bufferedHull, null, 2),
+    'utf8',
+  );
 
   console.log(`Finished writing output files to: ${outputPath}`);
 })();
