@@ -1,7 +1,7 @@
 const { createReadStream, createWriteStream } = require('node:fs');
 const { writeFile, mkdtemp, rm } = require('node:fs/promises');
 const turfConvex = require('@turf/convex').default;
-const turfBuffer = require('@turf/buffer');
+const turfBuffer = require('@turf/buffer').default;
 const turfCenterOfMass = require('@turf/center-of-mass').default;
 const bbox = require('@turf/bbox').default;
 const unzipper = require("unzipper");
