@@ -3,9 +3,7 @@
 Ingests a static GTFS feed and outputs useful geoJSON files. It supports excluding stops by transit agency.
 
 #### Output Files
-* `bounding-box.json` Used to define a default viewport by [bounding box](https://turfjs.org/docs/#bbox).
-* `center-area.json` Used to define a default viewport by [center](https://turfjs.org/docs/#centerOfMass) lat/lng and zoom level (define this in your app).
-* `buffered-hull.json` Used to figure out the above values and can be useful for other things. [docs](https://turfjs.org/docs/#buffer)
+* `transit-service-area.json`: A polygon that defines the area within which transit data is known.
 
 ## Getting Started
 

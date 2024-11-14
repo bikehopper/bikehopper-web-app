@@ -10,16 +10,14 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@turf/bbox": "^6.5.0",
-    "@turf/buffer": "^6.5.0",
-    "@turf/center-of-mass": "^6.5.0",
-    "@turf/convex": "^6.5.0",
+    "@turf/buffer": "^7.1.0",
+    "@turf/convex": "^7.1.0",
     "csv-parse": "^5.5.0",
     "gtfs": "^4.5.0",
-    "unzipper": "^0.10.14"
+    "unzipper": "^0.12.3"
   },
   "devDependencies": {
     "dotenv": "^16.3.1",
-    "vitest": "^0.34.3"
+    "vitest": "^2.1.4"
   }
 }

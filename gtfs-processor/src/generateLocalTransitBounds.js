@@ -1,13 +1,21 @@
 const { createReadStream, createWriteStream } = require('node:fs');
 const { writeFile, mkdtemp, rm } = require('node:fs/promises');
 const turfConvex = require('@turf/convex').default;
-const turfBuffer = require('@turf/buffer');
-const turfCenterOfMass = require('@turf/center-of-mass').default;
-const bbox = require('@turf/bbox').default;
+const turfBuffer = require('@turf/buffer').default;
 const unzipper = require("unzipper");
 const { resolve, join, basename} = require("path");
 const { tmpdir } = require('node:os');
 const { filterRouteIds, filterTripIds, getInterestingStopIds, getInterestingStopsAsGeoJsonPoints } = require('./gtfs-helpers');
+
+/*
+ * This script computes a polygon to define the "transit service area". The
+ * purpose for this is, if your instance supports streets routing over a wider
+ * geographical area than you have local transit information for, to warn your
+ * user if local transit options relevant to their journey might be missing.
+ *
+ * The approach is to compute a buffered hull around all the transit stops,
+ * excluding some stops that are filtered out by route ID or agency ID.
+ */
 
 const requiredGTFSFiles = new Set(['routes.txt', 'trips.txt', 'stop_times.txt', 'stops.txt']);
 const ENV_FILTERED_AGENCY_IDS = process.env.FILTERED_AGENCY_IDS || '';
@@ -26,27 +34,23 @@ async function unzip(src, dest) {
 }
 
 (async () => {
-  // computes a polygon to define the "transit service area"
-
-  // run this with an unzipped 511 GTFS dump saved in the current directory
-
-  // for non-Bay Area regions, you will want to change the next few lines that
-  // filter specific parts of the Bay Area transit data, but the rest of this
-  // algorithm should be usable
-
   // Initialize temprary folders to hold gtfs files
   const gtfsFilePath = resolve(process.env.GTFS_ZIP_PATH);
   const gtfsOutputPath =  await mkdtemp(join(tmpdir(), 'gtfs-'));
 
-  // decompress GTFS zip
   await unzip(gtfsFilePath, gtfsOutputPath);
 
-  // Bay Area: we want to filter out stops only served by ACE and Capitol
-  // Corridor JPA since they go far outside the area we have local transit for
-  // (e.g. Sacramento, Stockton)
+  /*
+   * When computing the transit service area, we want to only include stops
+   * served by *local* transit, and not by intra-city services. For example,
+   * the flagship BikeHopper instance, at the time of writing, supports
+   * streets routing for all of Northern California, but has GTFS data only
+   * for the SF Bay Area, except that we do have GTFS data for the Amtrak
+   * Capitol Corridor route, which would cause this script to include
+   * Sacramento, if we did not filter Capitol Corridor. Filtering out transit
+   * stops both by agency ID and by route ID is supported.
+   */
   const FILTERED_AGENCY_IDS = new Set(ENV_FILTERED_AGENCY_IDS.split(','));
-
-  // also let's manually filter the SolTrans B, which stops in Davis and Sacramento
   const MANUALLY_FILTERED_ROUTE_IDS = new Set(ENV_MANUALLY_FILTERED_ROUTE_IDS.split(','));
 
   const routesReadableStream = createReadStream(resolve(gtfsOutputPath, `routes.txt`), {encoding: 'utf8'});
@@ -73,16 +77,14 @@ async function unzip(src, dest) {
 
   const convexHull = turfConvex(interestingStopsCollection);
   const bufferedHull = turfBuffer(convexHull, 5, {units: 'miles'});
-  const centerOfBufferedHull = turfCenterOfMass(bufferedHull);
-  const boundingBox = bbox(bufferedHull);
 
   const outputPath = resolve(process.env.OUTPUT_DIR_PATH);
 
-  const writingBBox = writeFile(resolve(outputPath, 'bounding-box.json'), JSON.stringify(boundingBox, null, 2), 'utf8');
-  const writingCArea = writeFile(resolve(outputPath, 'center-area.json'), JSON.stringify(centerOfBufferedHull, null, 2), 'utf8');
-  const writingBHull = writeFile(resolve(outputPath, 'buffered-hull.json'), JSON.stringify(bufferedHull, null, 2), 'utf8');
+  await writeFile(
+    resolve(outputPath, 'transit-service-area.json'),
+    JSON.stringify(bufferedHull, null, 2),
+    'utf8',
+  );
 
-  await Promise.all([writingBBox, writingCArea, writingBHull]);
-
-  console.log(`Finsihed writing output files to: ${outputPath}`);
+  console.log(`Finished writing output files to: ${outputPath}`);
 })();
