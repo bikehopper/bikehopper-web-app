@@ -8,8 +8,6 @@ import {
 
 const router = express.Router();
 let geoConfigsCache = null;
-let agencyNamesCache = null;
-let dataAcknowledgement = null;
 
 async function readGeoConfigs() {
   if (geoConfigsCache) return geoConfigsCache;
@@ -25,12 +23,16 @@ async function readGeoConfigs() {
 
   const fileBuffers = await Promise.all(readingFiles);
 
-  geoConfigsCache = fileNames.reduce((accum, fileName, i) => {
+  const geoConfigs = fileNames.reduce((accum, fileName, i) => {
     accum[parse(fileName).name] = JSON.parse(fileBuffers[i]);
     return accum;
   }, {});
 
-  return geoConfigsCache;
+  if (process.env.NODE_ENV !== 'development') {
+    geoConfigsCache = geoConfigs;
+  }
+
+  return geoConfigs;
 }
 
 router.get('/', async (req, res) => {
@@ -45,6 +47,7 @@ router.get('/', async (req, res) => {
   if (geoConfigs && 'transit-service-area' in geoConfigs) {
     config.transitServiceArea = geoConfigs['transit-service-area'];
   }
+  delete config.gtfsRtUrls; // Not used in frontend (can't be, would expose token)
 
   res.json(config);
 });
