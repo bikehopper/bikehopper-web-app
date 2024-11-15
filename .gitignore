@@ -7,3 +7,5 @@ node_modules
 .env.production.local
 volumes
 .env
+
+config

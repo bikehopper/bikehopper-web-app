@@ -23,9 +23,7 @@ services:
       NAMESPACE: "${NAMESPACE}"
       GTFS_REALTIME_TOKEN: "${GTFS_REALTIME_TOKEN}"
       WEB_APP_GEO_CONFIG_FOLDER_CONTAINER_PATH: "${WEB_APP_GEO_CONFIG_FOLDER_CONTAINER_PATH}"
-      WEB_APP_AGENCY_NAMES_FILE_CONTAINER_PATH: "${WEB_APP_AGENCY_NAMES_FILE_CONTAINER_PATH}"
-      WEB_APP_DATA_ACK_FILE_CONTAINER_PATH: "${WEB_APP_DATA_ACK_FILE_CONTAINER_PATH}"
-      SUPPORTED_REGION: "${SUPPORTED_REGION}"
+      WEB_APP_REGION_CONFIG_PATH: "${WEB_APP_REGION_CONFIG_PATH}"
     healthcheck:
       test: curl -f --silent http://localhost:${WEB_APP_CONTAINER_PORT}/health
       retries: 20
@@ -40,11 +38,6 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.bikehopper-web-app.rule=Host(`api.app.localhost`)"
       - "traefik.http.routers.bikehopper-web-app.tls=true"
-    volumes:
-      - ".:/app"
-      - "${WEB_APP_GEO_CONFIG_HOST_PATH}:${WEB_APP_GEO_CONFIG_FOLDER_CONTAINER_PATH}"
-      - "${WEB_APP_AGENCY_NAMES_FILE_HOST_PATH}:${WEB_APP_AGENCY_NAMES_FOLDER_CONTAINER_PATH}"
-      # - "${WEB_APP_DATA_ACK_FILE_HOST_PATH}:${WEB_APP_DATA_ACK_FOLDER_CONTAINER_PATH}"
     ports:
       - 9229:9229
       - ${WEB_APP_CONTAINER_PORT}:${WEB_APP_CONTAINER_PORT}
