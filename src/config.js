@@ -4,20 +4,6 @@ import * as dotenvExpand from 'dotenv-expand';
 import { isEmpty } from 'ramda';
 import { URL } from 'node:url';
 
-export const PORT = Number(process.env.PORT);
-export const PROTOCOL = process.env.PROTOCOL;
-export const GRAPHHOPPER_SERVICE_NAME = process.env.GRAPHHOPPER_SERVICE_NAME;
-export const NAMESPACE = process.env.NAMESPACE;
-export const HOSTNAME = process.env.HOSTNAME;
-export const PHOTON_SERVICE_NAME = process.env.PHOTON_SERVICE_NAME;
-export const NOMINATIM_SERVICE_NAME = process.env.NOMINATIM_SERVICE_NAME;
-export const FILE_SERVICE_NAME = process.env.FILE_SERVICE_NAME;
-export const WEB_APP_GEO_CONFIG_FOLDER_CONTAINER_PATH = isEmpty(process.env.WEB_APP_GEO_CONFIG_FOLDER_CONTAINER_PATH) ? '/mnt/geoconfig' : process.env.WEB_APP_GEO_CONFIG_FOLDER_CONTAINER_PATH;
-export const SUPPORTED_REGION = process.env.SUPPORTED_REGION;
-export const WEB_APP_AGENCY_NAMES_FILE_CONTAINER_PATH = isEmpty(process.env.WEB_APP_AGENCY_NAMES_FILE_CONTAINER_PATH) ? '/mnt/agencies/names.json' : process.env.WEB_APP_AGENCY_NAMES_FILE_CONTAINER_PATH;
-export const WEB_APP_DATA_ACK_FILE_CONTAINER_PATH = isEmpty(process.env.WEB_APP_DATA_ACK_FILE_CONTAINER_PATH) ? '/mnt/acknowledgements/data.json' : process.env.WEB_APP_DATA_ACK_FILE_CONTAINER_PATH;
-export const CACHE_CONN_STRING = isEmpty(process.env.CACHE_CONN_STRING) ? undefined : process.env.CACHE_CONN_STRING;
-
 // Load .env files in a similar way to the bikehopper-ui frontend
 // .env.development.local, .env.development, .env, etc
 //
@@ -55,13 +41,31 @@ for (const dotenvFile of dotenvFiles) {
   }
 }
 
+export const PORT = Number(process.env.PORT);
+export const PROTOCOL = process.env.PROTOCOL;
+export const GRAPHHOPPER_SERVICE_NAME = process.env.GRAPHHOPPER_SERVICE_NAME;
+export const NAMESPACE = process.env.NAMESPACE;
+export const HOSTNAME = process.env.HOSTNAME;
+export const PHOTON_SERVICE_NAME = process.env.PHOTON_SERVICE_NAME;
+export const NOMINATIM_SERVICE_NAME = process.env.NOMINATIM_SERVICE_NAME;
+export const FILE_SERVICE_NAME = process.env.FILE_SERVICE_NAME;
+export const WEB_APP_GEO_CONFIG_FOLDER_CONTAINER_PATH = isEmpty(process.env.WEB_APP_GEO_CONFIG_FOLDER_CONTAINER_PATH) ? '/mnt/geoconfig' : process.env.WEB_APP_GEO_CONFIG_FOLDER_CONTAINER_PATH;
+export const WEB_APP_REGION_CONFIG_PATH = isEmpty(process.env.WEB_APP_REGION_CONFIG_PATH) ? '/mnt/region-config.json' : process.env.WEB_APP_REGION_CONFIG_PATH;
+export const CACHE_CONN_STRING = isEmpty(process.env.CACHE_CONN_STRING) ? undefined : process.env.CACHE_CONN_STRING;
+
 export const GTFS_REALTIME_TOKEN = isEmpty(process.env.GTFS_REALTIME_TOKEN) ? null : process.env.GTFS_REALTIME_TOKEN;
 export const GTFS_REALTIME_VEHICLE_POSITION_TOKEN = isEmpty(process.env.GTFS_REALTIME_VEHICLE_POSITION_TOKEN) ? null : process.env.GTFS_REALTIME_VEHICLE_POSITION_TOKEN;
 export const GTFS_REALTIME_TRIP_UPDATES_TOKEN = isEmpty(process.env.GTFS_REALTIME_TRIP_UPDATES_TOKEN) ? null : process.env.GTFS_REALTIME_TRIP_UPDATES_TOKEN;
 export const GTFS_REALTIME_SERVICE_ALERTS_TOKEN = isEmpty(process.env.GTFS_REALTIME_SERVICE_ALERTS_TOKEN) ? null : process.env.GTFS_REALTIME_SERVICE_ALERTS_TOKEN;
-export const GTFS_REALTIME_ALERTS_URL = isEmpty(process.env.GTFS_REALTIME_ALERTS_URL) ? null : new URL(process.env.GTFS_REALTIME_ALERTS_URL);
-export const GTFS_REALTIME_VEHICLE_POSITIONS_URL = isEmpty(process.env.GTFS_REALTIME_VEHICLE_POSITIONS_URL) ? null : new URL(process.env.GTFS_REALTIME_VEHICLE_POSITIONS_URL);
-export const GTFS_REALTIME_TRIP_UPDATES_URL = isEmpty(process.env.GTFS_REALTIME_TRIP_UPDATES_URL) ? null : new URL(process.env.GTFS_REALTIME_TRIP_UPDATES_URL);
+
+const regionConfig = JSON.parse(fs.readFileSync(WEB_APP_REGION_CONFIG_PATH, 'utf8'));
+
+export const REGION_CONFIG = regionConfig;
+
+export const GTFS_REALTIME_ALERTS_URL = regionConfig.gtfsRtUrls?.alerts;
+export const GTFS_REALTIME_VEHICLE_POSITIONS_URL =
+  regionConfig.gtfsRtUrls?.vehiclePositions;
+export const GTFS_REALTIME_TRIP_UPDATES_URL = regionConfig.gtfsRtUrls?.tripUpdates;
 
 // 511.org allows us 60 requests per hour, let's be conservative and
 // cache for 3min to make it a maximum of 20.

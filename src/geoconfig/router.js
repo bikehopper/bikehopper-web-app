@@ -2,16 +2,12 @@ import express from 'express';
 import { extname, join, parse } from 'node:path';
 import { readdir, readFile } from 'node:fs/promises';
 import {
+  REGION_CONFIG,
   WEB_APP_GEO_CONFIG_FOLDER_CONTAINER_PATH,
-  SUPPORTED_REGION,
-  WEB_APP_AGENCY_NAMES_FILE_CONTAINER_PATH,
-  WEB_APP_DATA_ACK_FILE_CONTAINER_PATH
 } from '../config.js';
 
 const router = express.Router();
 let geoConfigsCache = null;
-let agencyNamesCache = null;
-let dataAcknowledgement = null;
 
 async function readGeoConfigs() {
   if (geoConfigsCache) return geoConfigsCache;
@@ -27,64 +23,33 @@ async function readGeoConfigs() {
 
   const fileBuffers = await Promise.all(readingFiles);
 
-  geoConfigsCache = fileNames.reduce((accum, fileName, i) => {
-    accum['geoConfig'][parse(fileName).name] = JSON.parse(fileBuffers[i]);
+  const geoConfigs = fileNames.reduce((accum, fileName, i) => {
+    accum[parse(fileName).name] = JSON.parse(fileBuffers[i]);
     return accum;
-  }, {
-    geoConfig: {}
-  });
+  }, {});
 
-  return geoConfigsCache;
-}
+  if (process.env.NODE_ENV !== 'development') {
+    geoConfigsCache = geoConfigs;
+  }
 
-async function readAgencyNames() {
-  if (agencyNamesCache) return agencyNamesCache;
-
-  const fileBuffer = await readFile(WEB_APP_AGENCY_NAMES_FILE_CONTAINER_PATH, { encoding: 'utf8' });
-  
-  agencyNamesCache = {
-    agencyNames: JSON.parse(fileBuffer)
-  };
-
-  return agencyNamesCache;
-}
-
-async function readDataAcknowledgement() {
-  if (dataAcknowledgement) return dataAcknowledgement;
-  const fileBuffer = await readFile(WEB_APP_DATA_ACK_FILE_CONTAINER_PATH, { encoding: 'utf8' });
-  
-  dataAcknowledgement = {
-    dataAcknowledgements: JSON.parse(fileBuffer)
-  };
-
-  return dataAcknowledgement;
+  return geoConfigs;
 }
 
 router.get('/', async (req, res) => {
-  const configFileResults = await Promise.allSettled([
-    readGeoConfigs(),
-    readAgencyNames(),
-    readDataAcknowledgement()
-  ]);
+  let geoConfigs;
+  try {
+    geoConfigs = await readGeoConfigs();
+  } catch (err) {
+    console.warn('failed to read geoconfigs', err);
+  }
 
-  configFileResults
-    .filter(result => result.status === 'rejected')
-    .forEach(failedResult => {
-      console.warn('failed to read a dynamic config file.', failedResult.reason);
-    });
+  const config = {...REGION_CONFIG};
+  if (geoConfigs && 'transit-service-area' in geoConfigs) {
+    config.transitServiceArea = geoConfigs['transit-service-area'];
+  }
+  delete config.gtfsRtUrls; // Not used in frontend (can't be, would expose token)
 
-  const responseConfig = configFileResults
-    .filter(result => result.status === 'fulfilled')
-    .reduce((accum, result) => {
-      return {
-        ...accum,
-        ...result.value
-      }
-    }, {
-      supportedRegion: SUPPORTED_REGION
-    });
-
-  res.json(responseConfig);
+  res.json(config);
 });
 
 export default router;
