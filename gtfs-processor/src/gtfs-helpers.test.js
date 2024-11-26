@@ -2,8 +2,6 @@ import { expect, test, describe, vi } from 'vitest';
 const { filterRouteIds, filterTripIds, getInterestingStopIds, getInterestingStopsAsGeoJsonPoints } = require('./gtfs-helpers');
 const { PassThrough } = require('stream');
 
-vi.mock('node:fs/promises');
-
 describe('#filterRouteIds', async () => {
   test('should select all the IDs that have a matching prefix', async () => {
     const mockReadable = new PassThrough();
