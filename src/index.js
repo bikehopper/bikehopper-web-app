@@ -13,6 +13,7 @@ import { router as nominatimRouter } from './nominatim/index.js';
 import { router as fileRouter } from './file/index.js';
 import { router as geoConfigRouter } from './geoconfig/index.js';
 import { router as realtimeRouter } from './realtime-gtfs/index.js';
+import { loadLookupTables } from './route-linestring/client.js';
 
 if (!satisfies(process.version, '>=18')) {
   console.error('ERROR: bikehopper-web-app requires node v18');
@@ -44,6 +45,9 @@ app.use((req, res, next) => {
   httpLogger(req, res);
   next();
 });
+
+// Load lookup tables for routeline clipping into memory
+loadLookupTables();
 
 app.use((req, res, next) => {
   if (process.env.NODE_ENV === 'development') {
