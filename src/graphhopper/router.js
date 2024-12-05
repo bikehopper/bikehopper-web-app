@@ -3,7 +3,7 @@ import graphHopperClient from './client.js';
 import logger from '../lib/logger.js';
 import * as gtfsRtClient from '../gtfs-rt/client.js';
 import { mergeAlertsIntoRoutes } from '../gtfs-rt/alerts.js';
-import { replacePtRoutlinesWithHighres } from '../route-linestring/index.js';
+import { replacePtRouteLinesWithHighres } from '../route-linestring/index.js';
 
 const router = express.Router();
 router.use((req, res, next) => {
@@ -33,7 +33,7 @@ router.get('/route-pt', async (req, res) => {
     if (alertResult.status === 'rejected') logger.error(alertResult.reason);
 
     const routesWithAlerts = mergeAlertsIntoRoutes(alertResult.value, graphHopperResult.value.data);
-    res.json(replacePtRoutlinesWithHighres(routesWithAlerts));
+    res.json(replacePtRouteLinesWithHighres(routesWithAlerts));
   } catch (error) {
     logger.error(error);
     if (error.response) {

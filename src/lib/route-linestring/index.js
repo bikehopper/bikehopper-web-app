@@ -20,7 +20,7 @@ export async function loadLookupTables() {
   }
 }
 
-export function replacePtRoutlinesWithHighres(routes) {
+export function replacePtRouteLinesWithHighres(routes) {
   if (lookupTables == null) return routes;
 
   const {
