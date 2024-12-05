@@ -49,10 +49,14 @@ export function replacePtRouteLinesWithHighres(routes) {
 
         const routeId = leg['route_id'];
         const tripId = leg['trip_id'];
+        logger.info(`Route id: ${routeId} Trip id: ${tripId}`);
         const shapeId = stopTripShapeLookup[routeId][tripId];
+        logger.info(`ShapeId: ${shapeId}`);
         const shape = shapeIdLineStringLookup[shapeId];
+        logger.info(shape);
 
         if (shape) {
+          logger.info('Shape is nullish, not clippig');
           const fullLineString = lineString(shape);
   
           const startPoint = point(startStop.geometry.coordinates);
