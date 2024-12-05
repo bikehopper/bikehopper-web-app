@@ -10,7 +10,6 @@ import { PORT as port } from './config.js';
 import { router as graphHopperRouter } from './graphhopper/index.js';
 import { router as photonRouter } from './photon/index.js';
 import { router as nominatimRouter } from './nominatim/index.js';
-import { router as fileRouter } from './file/index.js';
 import { router as geoConfigRouter } from './geoconfig/index.js';
 import { router as realtimeRouter } from './realtime-gtfs/index.js';
 
@@ -86,10 +85,6 @@ app.use('/api/v1/graphhopper', graphHopperRouter);
 // TODO: remove in next release
 app.use('/v1/photon', photonRouter);
 app.use('/api/v1/photon', photonRouter);
-
-// all routes that should be forwarded to the fit file creator
-app.use('/v1/file', fileRouter);
-app.use('/api/v1/file', fileRouter);
 
 // all routes that should be forwarded to nominatim
 // TODO: remove in next release
