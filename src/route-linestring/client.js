@@ -8,11 +8,9 @@ import { WEB_APP_GEO_CONFIG_FOLDER_CONTAINER_PATH } from '../config.js';
 
 let lookupTables = null;
 
-// TODO: change to envvar
-const ROUTELINE_LOOKUP_PATH = join(WEB_APP_GEO_CONFIG_FOLDER_CONTAINER_PATH, '/oute-line-lookup.json');
-
 export async function loadLookupTables() {
   try {
+    const ROUTELINE_LOOKUP_PATH = join(WEB_APP_GEO_CONFIG_FOLDER_CONTAINER_PATH, 'route-line-lookup.json');
     const contents = await readFile(resolve(ROUTELINE_LOOKUP_PATH), { encoding: 'utf8' });
     lookupTables = JSON.parse(contents);
     logger.info('Loaded lookup tables for generated highres routelines');
