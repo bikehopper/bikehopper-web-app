@@ -6,8 +6,21 @@ import { lineSlice } from '@turf/line-slice';
 import { lineString, point } from '@turf/helpers';
 import { WEB_APP_GEO_CONFIG_FOLDER_CONTAINER_PATH } from '../config.js';
 
-let lookupTables = null;
+import express from 'express';
 
+let lookupTables = null;
+export const tempRoutelineDebug = express.Router();
+
+tempRoutelineDebug.get('/route-line-debug', async (req, res) => {
+  try {
+    res.json(lookupTables != null ? lookupTables : {lookupstables: null});
+  } catch (error) {
+    logger.error(error);
+    res.status(500);
+  } finally {
+    res.end();
+  }
+});
 export async function loadLookupTables() {
   try {
     const ROUTELINE_LOOKUP_PATH = join(WEB_APP_GEO_CONFIG_FOLDER_CONTAINER_PATH, 'route-line-lookup.json');
