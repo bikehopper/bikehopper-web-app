@@ -13,7 +13,7 @@ import { router as nominatimRouter } from './nominatim/index.js';
 import { router as fileRouter } from './file/index.js';
 import { router as geoConfigRouter } from './geoconfig/index.js';
 import { router as realtimeRouter } from './realtime-gtfs/index.js';
-import { loadLookupTables } from './lib/route-linestring/index.js';
+import { loadLookupTables } from './lib/route-linestring.js';
 
 
 async function initApp() {
