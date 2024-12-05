@@ -3,7 +3,7 @@ import graphHopperClient from './client.js';
 import logger from '../lib/logger.js';
 import * as gtfsRtClient from '../gtfs-rt/client.js';
 import { mergeAlertsIntoRoutes } from '../gtfs-rt/alerts.js';
-import { replacePtRouteLinesWithHighres } from '../route-linestring/index.js';
+import { replacePtRouteLinesWithHighres } from '../lib/route-linestring/index.js';
 
 const router = express.Router();
 router.use((req, res, next) => {
