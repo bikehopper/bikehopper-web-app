@@ -12,7 +12,7 @@ import { router as photonRouter } from './photon/index.js';
 import { router as nominatimRouter } from './nominatim/index.js';
 import { router as geoConfigRouter } from './geoconfig/index.js';
 import { router as realtimeRouter } from './realtime-gtfs/index.js';
-import { loadLookupTables } from './lib/route-linestring.js';
+import { loadLookupTables, tempRoutelineDebug } from './lib/route-linestring.js';
 
 
 async function initApp() {
@@ -81,6 +81,10 @@ async function initApp() {
   // all routes that should be forwarded to photon
   app.use('/v1/geocode', photonRouter);
   app.use('/api/v1/geocode', photonRouter);
+
+  // all routes that should be forwarded to photon
+  app.use('/v1/debug', tempRoutelineDebug);
+  app.use('/api/v1/debug', tempRoutelineDebug);
   
   // all routes that should be forwarded to graphhopper
   // TODO: remove in next release
