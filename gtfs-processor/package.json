@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "node -r dotenv/config ./src/generateLocalTransitBounds.js",
+    "start": "node -r dotenv/config ./src/generate-gtfs-derived-assets.js",
     "test": "vitest"
   },
   "author": "",

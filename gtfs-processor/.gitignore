@@ -4,3 +4,4 @@ node_modules
 volumes
 gtfs
 output
+geojson

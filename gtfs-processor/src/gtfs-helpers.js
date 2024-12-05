@@ -1,4 +1,7 @@
 const { parse } = require('csv-parse');
+const { createReadStream, createWriteStream } = require('node:fs');
+const unzipper = require('unzipper');
+const { join, basename} = require('path');
 
 async function filterRouteIds(filteredAgencyIds, manuallyFilteredRouteIds, gtfsReadableStream) {
   const filteredRouteIds = new Set(manuallyFilteredRouteIds);
@@ -104,9 +107,22 @@ async function getInterestingStopsAsGeoJsonPoints(interestingStopIds, gtfsReadab
   return stops;
 }
 
+async function unzipGtfs(src, dest, requiredGTFSFiles) {
+  const zip = createReadStream(src).pipe(unzipper.Parse({forceStream: true}));
+  for await (const entry of zip) {
+    const fileName = basename(entry.path);
+    if (requiredGTFSFiles.has(fileName)) {
+      entry.pipe(createWriteStream(join(dest, fileName)));
+    } else {
+      entry.autodrain();
+    }
+  }
+}
+
 module.exports = {
   filterRouteIds,
   filterTripIds,
   getInterestingStopIds,
   getInterestingStopsAsGeoJsonPoints,
+  unzipGtfs,
 };
