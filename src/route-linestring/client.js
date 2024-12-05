@@ -1,14 +1,15 @@
 import { readFile } from 'node:fs/promises';
-import { resolve } from 'node:path';
+import { resolve, join } from 'node:path';
 import logger from '../lib/logger.js';
 
 import { lineSlice } from '@turf/line-slice';
 import { lineString, point } from '@turf/helpers';
+import { WEB_APP_GEO_CONFIG_FOLDER_CONTAINER_PATH } from '../config.js';
 
 let lookupTables = null;
 
 // TODO: change to envvar
-const ROUTELINE_LOOKUP_PATH = './src/route-linestring/route-line-lookup.json';
+const ROUTELINE_LOOKUP_PATH = join(WEB_APP_GEO_CONFIG_FOLDER_CONTAINER_PATH, '/oute-line-lookup.json');
 
 export async function loadLookupTables() {
   try {
