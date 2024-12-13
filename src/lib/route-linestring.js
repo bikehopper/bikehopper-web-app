@@ -23,33 +23,44 @@ export async function loadLookupTables() {
 export function replacePtRouteLinesWithHighres(routes) {
   if (lookupTables == null) return routes;
 
-  const {
-    stopTripShapeLookup,
-    shapeIdLineStringLookup,
-  } = lookupTables;
-
-  for (const path of routes.paths) {
-    for (const leg of path.legs) {
-      if (leg.type === 'pt'){
-        const startStop = leg.stops[0];
-        const endStop = leg.stops[leg.stops.length -1];
-
-        const routeId = leg['route_id'];
-        const tripId = leg['trip_id'];
-        const shapeId = stopTripShapeLookup[routeId][tripId];
-        const shape = shapeIdLineStringLookup[shapeId];
-
-        if (shape) {
-          const fullLineString = lineString(shape);
+  try {
+    const routesCopy = JSON.parse(JSON.stringify(routes));
+    const {
+      stopTripShapeLookup,
+      shapeIdLineStringLookup,
+    } = lookupTables;
   
-          const startPoint = point(startStop.geometry.coordinates);
-          const endPoint = point(endStop.geometry.coordinates);
-          const slicedLine = lineSlice(startPoint, endPoint, fullLineString);
-          leg['geometry'] = slicedLine.geometry;
+    for (const path of routesCopy.paths) {
+      for (const leg of path.legs) {
+        if (leg.type === 'pt'){
+          const startStop = leg.stops[0];
+          const endStop = leg.stops[leg.stops.length -1];
+  
+          const routeId = leg['route_id'];
+          const tripId = leg['trip_id'];
+          const shapeIdsForRoute = stopTripShapeLookup[routeId];
+  
+          if (shapeIdsForRoute) {
+            const shapeId = shapeIdsForRoute[tripId];
+            const shape = shapeIdLineStringLookup[shapeId];
+    
+            if (shape) {
+              const fullLineString = lineString(shape);
+      
+              const startPoint = point(startStop.geometry.coordinates);
+              const endPoint = point(endStop.geometry.coordinates);
+              const slicedLine = lineSlice(startPoint, endPoint, fullLineString);
+              leg['geometry'] = slicedLine.geometry;
+            }
+          }
         }
       }
     }
-  }
 
-  return routes;
+    return routesCopy;
+  } catch (e) {
+    logger.error('Error occurred while trying to clip route linestring');
+    logger.error(e);
+    return routes;
+  }
 }
