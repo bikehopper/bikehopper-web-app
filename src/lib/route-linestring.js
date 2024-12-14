@@ -23,12 +23,13 @@ export async function loadLookupTables() {
 export function replacePtRouteLinesWithHighres(routes) {
   if (lookupTables == null) return routes;
 
+  const routesCopy = JSON.parse(JSON.stringify(routes));
   const {
     stopTripShapeLookup,
     shapeIdLineStringLookup,
   } = lookupTables;
 
-  for (const path of routes.paths) {
+  for (const path of routesCopy.paths) {
     for (const leg of path.legs) {
       if (leg.type === 'pt'){
         const startStop = leg.stops[0];
@@ -36,20 +37,31 @@ export function replacePtRouteLinesWithHighres(routes) {
 
         const routeId = leg['route_id'];
         const tripId = leg['trip_id'];
-        const shapeId = stopTripShapeLookup[routeId][tripId];
-        const shape = shapeIdLineStringLookup[shapeId];
+        const shapeIdsForRoute = stopTripShapeLookup[routeId];
 
-        if (shape) {
-          const fullLineString = lineString(shape);
+        if (shapeIdsForRoute) {
+          const shapeId = shapeIdsForRoute[tripId];
+          const shape = shapeIdLineStringLookup[shapeId];
   
-          const startPoint = point(startStop.geometry.coordinates);
-          const endPoint = point(endStop.geometry.coordinates);
-          const slicedLine = lineSlice(startPoint, endPoint, fullLineString);
-          leg['geometry'] = slicedLine.geometry;
+          if (shape) {
+            try {
+              const fullLineString = lineString(shape);
+      
+              const startPoint = point(startStop.geometry.coordinates);
+              const endPoint = point(endStop.geometry.coordinates);
+              const slicedLine = lineSlice(startPoint, endPoint, fullLineString);
+              leg['geometry'] = slicedLine.geometry;
+              
+            } catch (e) {
+              logger.error('Error occurred while trying to clip route linestring');
+              logger.error(e);
+              return routes;
+            }
+          }
         }
       }
     }
   }
 
-  return routes;
+  return routesCopy;
 }
