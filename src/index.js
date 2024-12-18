@@ -5,7 +5,7 @@ import pinoHttp from 'pino-http';
 import { satisfies } from 'compare-versions';
 
 import logger from './lib/logger.js';
-import { PORT as port } from './config.js';
+import { WEB_APP_GEO_CONFIG_FOLDER_CONTAINER_PATH, PORT as port } from './config.js';
 
 import { router as graphHopperRouter } from './graphhopper/index.js';
 import { router as photonRouter } from './photon/index.js';
@@ -13,6 +13,7 @@ import { router as nominatimRouter } from './nominatim/index.js';
 import { router as geoConfigRouter } from './geoconfig/index.js';
 import { router as realtimeRouter } from './realtime-gtfs/index.js';
 import { loadLookupTables } from './lib/route-linestring.js';
+import path from 'path';
 
 
 async function initApp() {
@@ -96,6 +97,10 @@ async function initApp() {
   // TODO: remove in next release
   app.use('/v1/nominatim', nominatimRouter);
   app.use('/api/v1/nominatim', nominatimRouter);
+
+  app.use('/route-tiles', 
+    express.static(path.join(WEB_APP_GEO_CONFIG_FOLDER_CONTAINER_PATH, 'route-tiles'))
+  );
   
   process.on('SIGINT', function() {
     logger.info( "\nGracefully shutting down from SIGINT (Ctrl-C)" );
