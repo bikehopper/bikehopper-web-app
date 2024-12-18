@@ -98,9 +98,9 @@ async function initApp() {
   app.use('/v1/nominatim', nominatimRouter);
   app.use('/api/v1/nominatim', nominatimRouter);
 
-  app.use('/route-tiles', 
-    express.static(path.join(WEB_APP_GEO_CONFIG_FOLDER_CONTAINER_PATH, 'route-tiles'))
-  );
+  const routeTiles = express.static(path.join(WEB_APP_GEO_CONFIG_FOLDER_CONTAINER_PATH, 'route-tiles'));
+  app.use('/v1/route-tiles', routeTiles);
+  app.use('/api/v1/route-tiles', routeTiles);
   
   process.on('SIGINT', function() {
     logger.info( "\nGracefully shutting down from SIGINT (Ctrl-C)" );
