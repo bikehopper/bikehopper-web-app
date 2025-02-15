@@ -98,15 +98,30 @@ async function initApp() {
   app.use('/v1/nominatim', nominatimRouter);
   app.use('/api/v1/nominatim', nominatimRouter);
 
-  const routeTiles = express.static(path.join(WEB_APP_GEO_CONFIG_FOLDER_CONTAINER_PATH, 'route-tiles'));
+  // Add headers so mapliber-gl decodes protobufs appropriately
+  const staticTilesOpts = { 
+    setHeaders: (res, _, _) => {
+      res.setHeader('Content-Encoding', 'gzip');
+      res.setHeader('Content-Type', 'application/x-protobuf');
+    },
+  };
+
+  // Expose static endpoint for tileset containing route-lines
+  const routeTiles = express.static(
+    path.join(WEB_APP_GEO_CONFIG_FOLDER_CONTAINER_PATH, 'route-tiles'),
+    staticTilesOpts
+  );
   app.use('/v1/route-tiles', routeTiles);
   app.use('/api/v1/route-tiles', routeTiles);
   
-  process.on('SIGINT', function() {
-    logger.info( "\nGracefully shutting down from SIGINT (Ctrl-C)" );
-    // some other closing procedures go here
-    process.exit(0);
-  });
+  // Expose static endpoint for tileset containing stop points
+  const stopTiles = express.static(
+    path.join(WEB_APP_GEO_CONFIG_FOLDER_CONTAINER_PATH, 'stop-tiles'),
+    staticTilesOpts
+  );
+  app.use('/v1/stop-tiles', stopTiles);
+  app.use('/api/v1/stop-tiles', stopTiles);
+
   
   process.on('SIGTERM', function() {
     logger.info( "\nGracefully shutting down from SIGTERM (Ctrl-C)" );
