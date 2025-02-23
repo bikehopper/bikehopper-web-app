@@ -122,6 +122,11 @@ async function initApp() {
   app.use('/v1/stop-tiles', stopTiles);
   app.use('/api/v1/stop-tiles', stopTiles);
 
+  process.on('SIGINT', function() {
+    logger.info( "\nGracefully shutting down from SIGINT (Ctrl-C)" );
+    // some other closing procedures go here
+    process.exit(0);
+  });
   
   process.on('SIGTERM', function() {
     logger.info( "\nGracefully shutting down from SIGTERM (Ctrl-C)" );
