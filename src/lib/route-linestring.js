@@ -25,7 +25,7 @@ export function replacePtRouteLinesWithHighres(routes) {
 
   const routesCopy = JSON.parse(JSON.stringify(routes));
   const {
-    stopTripShapeLookup,
+    routeTripShapeLookup,
     shapeIdLineStringLookup,
     tripIdStopIdsLookup,
   } = lookupTables;
@@ -38,7 +38,7 @@ export function replacePtRouteLinesWithHighres(routes) {
 
         const routeId = leg['route_id'];
         const tripId = leg['trip_id'];
-        const shapeIdsForRoute = stopTripShapeLookup[routeId];
+        const shapeIdsForRoute = routeTripShapeLookup[routeId];
         leg['all_stop_ids'] = tripIdStopIdsLookup[tripId];
 
         if (shapeIdsForRoute) {
