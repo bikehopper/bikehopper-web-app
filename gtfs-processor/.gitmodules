@@ -1,0 +1,3 @@
+[submodule "submodule-deps/tippecanoe"]
+	path = submodule-deps/tippecanoe
+	url = https://github.com/felt/tippecanoe.git
