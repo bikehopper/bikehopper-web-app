@@ -5,7 +5,7 @@ import pinoHttp from 'pino-http';
 import { satisfies } from 'compare-versions';
 
 import logger from './lib/logger.js';
-import { PORT as port } from './config.js';
+import { WEB_APP_GEO_CONFIG_FOLDER_CONTAINER_PATH, PORT as port } from './config.js';
 
 import { router as graphHopperRouter } from './graphhopper/index.js';
 import { router as photonRouter } from './photon/index.js';
@@ -13,6 +13,7 @@ import { router as nominatimRouter } from './nominatim/index.js';
 import { router as geoConfigRouter } from './geoconfig/index.js';
 import { router as realtimeRouter } from './realtime-gtfs/index.js';
 import { loadLookupTables } from './lib/route-linestring.js';
+import path from 'path';
 
 
 async function initApp() {
@@ -96,7 +97,31 @@ async function initApp() {
   // TODO: remove in next release
   app.use('/v1/nominatim', nominatimRouter);
   app.use('/api/v1/nominatim', nominatimRouter);
+
+  // Add headers so mapliber-gl decodes protobufs appropriately
+  const staticTilesOpts = { 
+    setHeaders: (res, _u1, _u2) => {
+      res.setHeader('Content-Encoding', 'gzip');
+      res.setHeader('Content-Type', 'application/x-protobuf');
+    },
+  };
+
+  // Expose static endpoint for tileset containing route-lines
+  const routeTiles = express.static(
+    path.join(WEB_APP_GEO_CONFIG_FOLDER_CONTAINER_PATH, 'route-tiles'),
+    staticTilesOpts
+  );
+  app.use('/v1/route-tiles', routeTiles);
+  app.use('/api/v1/route-tiles', routeTiles);
   
+  // Expose static endpoint for tileset containing stop points
+  const stopTiles = express.static(
+    path.join(WEB_APP_GEO_CONFIG_FOLDER_CONTAINER_PATH, 'stop-tiles'),
+    staticTilesOpts
+  );
+  app.use('/v1/stop-tiles', stopTiles);
+  app.use('/api/v1/stop-tiles', stopTiles);
+
   process.on('SIGINT', function() {
     logger.info( "\nGracefully shutting down from SIGINT (Ctrl-C)" );
     // some other closing procedures go here
