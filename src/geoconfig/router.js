@@ -2,6 +2,8 @@ import express from 'express';
 import { join } from 'node:path';
 import { readFile } from 'node:fs/promises';
 import {
+  MAPBOX_ACCESS_TOKEN,
+  MAPBOX_STYLE_URL,
   REGION_CONFIG,
   WEB_APP_GEO_CONFIG_FOLDER_CONTAINER_PATH,
 } from '../config.js';
@@ -32,6 +34,14 @@ router.get('/', async (req, res) => {
     config.transitServiceArea = transitServiceArea;
   }
   delete config.gtfsRtUrls; // Not used in frontend (can't be, would expose token)
+
+  if (MAPBOX_ACCESS_TOKEN != null) {
+    config.mapboxAccessToken = MAPBOX_ACCESS_TOKEN;
+  }
+
+  if (MAPBOX_STYLE_URL != null) {
+    config.mapboxStyleUrl = MAPBOX_STYLE_URL;
+  }
 
   res.json(config);
 });

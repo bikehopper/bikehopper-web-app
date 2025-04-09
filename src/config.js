@@ -72,3 +72,6 @@ const DEFAULT_ALERTS_CACHE_TIME_MSEC = 3 * 60 * 1000;
 export const ALERTS_CACHE_TIME_MSEC = (
   process.env.ALERTS_CACHE_TIME_MSEC || DEFAULT_ALERTS_CACHE_TIME_MSEC
 );
+
+export const MAPBOX_ACCESS_TOKEN = isEmpty(process.env.MAPBOX_ACCESS_TOKEN) ? null : process.env.MAPBOX_ACCESS_TOKEN;
+export const MAPBOX_STYLE_URL = isEmpty(process.env.MAPBOX_STYLE_URL) ? null : process.env.MAPBOX_STYLE_URL;
