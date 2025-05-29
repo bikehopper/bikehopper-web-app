@@ -35,10 +35,13 @@ const gtfsImportConfig = {
   agencies: [
     {
       path: gtfsFilePath,
+      // Not sure what route_attributes is (not in spec!) but the lib complains
+      // about a primary-key uniqueness issue in it with regard to the Bay Area 511
+      // GTFS. We do not use it.
+      exclude: ['route_attributes'],
     },
   ],
   sqlitePath,
-  ignoreDuplicates: true,  // work around fare products bug in Node-GTFS
 };
 await importGtfs(gtfsImportConfig);
 const gtfsDb = openDb(gtfsImportConfig);

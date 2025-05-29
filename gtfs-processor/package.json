@@ -17,7 +17,7 @@
     "@turf/buffer": "^7.1.0",
     "@turf/convex": "^7.1.0",
     "csv-parse": "^5.5.0",
-    "gtfs": "^4.17.3",
+    "gtfs": "^4.17.4",
     "shelljs": "^0.8.5",
     "unzipper": "^0.12.3"
   },
