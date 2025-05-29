@@ -4,7 +4,7 @@ COPY ./submodule-deps /app/submodule-deps
 WORKDIR /app/submodule-deps/tippecanoe
 RUN make
 
-FROM node:20-slim
+FROM node:22-slim
 WORKDIR /app
 RUN apt-get update && apt-get -y install dumb-init libsqlite3-dev zlib1g-dev
 COPY --from=tippecanoe-builder /app/submodule-deps/tippecanoe/tippecanoe* /usr/local/bin/

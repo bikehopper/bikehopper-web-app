@@ -4,6 +4,9 @@
   "description": "",
   "main": "index.js",
   "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
   "scripts": {
     "start": "node -r dotenv/config ./src/generate-gtfs-derived-assets.js",
     "test": "vitest"
