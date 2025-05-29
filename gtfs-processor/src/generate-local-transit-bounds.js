@@ -1,9 +1,10 @@
-const { createReadStream } = require('node:fs');
-const { writeFile } = require('node:fs/promises');
-const turfConvex = require('@turf/convex').default;
-const turfBuffer = require('@turf/buffer').default;
-const { resolve } = require("path");
-const { filterRouteIds, filterTripIds, getInterestingStopIds, getInterestingStopsAsGeoJsonPoints } = require('./gtfs-helpers');
+import { writeFile } from 'node:fs/promises';
+import turfConvex from '@turf/convex';
+import turfBuffer from '@turf/buffer';
+import { resolve } from 'node:path';
+
+import { getAgencies, getRoutes, getStops } from 'gtfs';
+
 
 /**
  * Computes a polygon to define the "transit service area". The
@@ -14,16 +15,14 @@ const { filterRouteIds, filterTripIds, getInterestingStopIds, getInterestingStop
  * The approach is to compute a buffered hull around all the transit stops,
  * excluding some stops that are filtered out by route ID or agency ID.
  * 
- * @param {string} unzippedGtfsPath Path to directory containing unzipped gtfs text files
  * @param {string} filteredAgencyIdsString comma separated sting of agency ids
  * @param {string} manuallyFilteredRouteIdsString  comma separated string of route ids
- * @param {string} boundsOutpoutPath Path to directory to output the generated data into
+ * @param {string} boundsOutputPath Path to directory to output the generated data into
  */
-async function generateLocalTransitBounds(
-  unzippedGtfsPath,
-  filteredAgencyIdsString,
-  manuallyFilteredRouteIdsString,
-  boundsOutpoutPath,
+export default async function generateLocalTransitBounds(
+  filteredAgencyIds,
+  manuallyFilteredRouteIds,
+  boundsOutputPath,
 ) {
   /*
   * When computing the transit service area, we want to only include stops
@@ -35,25 +34,35 @@ async function generateLocalTransitBounds(
   * Sacramento, if we did not filter Capitol Corridor. Filtering out transit
   * stops both by agency ID and by route ID is supported.
   */
-  const filteredAgencyIds = new Set(filteredAgencyIdsString.split(','));
-  const manuallyFilteredRouteIds = new Set(manuallyFilteredRouteIdsString.split(','));
+  const allAgencyIds = new Set(
+    getAgencies({}, ['agency_id'])
+      .map(agency => agency.agency_id)
+  );
+  const interestingAgencyIds = allAgencyIds.difference(new Set(filteredAgencyIds));
 
-  const routesReadableStream = createReadStream(resolve(unzippedGtfsPath, `routes.txt`), {encoding: 'utf8'});
-  const filteredRouteIds = await filterRouteIds(filteredAgencyIds, manuallyFilteredRouteIds, routesReadableStream);
+  const allRouteIdsOfInterestingAgencies = new Set(
+    getRoutes(
+      { agency_id: Array.from(interestingAgencyIds) },
+      ['route_id'],
+    ).map(route => route.route_id)
+  );
+  const interestingRouteIds = allRouteIdsOfInterestingAgencies.difference(
+    new Set(manuallyFilteredRouteIds)
+  );
 
-  const tripsReadableStream = createReadStream(resolve(unzippedGtfsPath, `trips.txt`), {encoding: 'utf8'})
-  const filteredTripIds = await filterTripIds(filteredRouteIds, tripsReadableStream);
+  const interestingStops = getStops(
+    { route_id: Array.from(interestingRouteIds) },
+    ['stop_id', 'stop_lon', 'stop_lat'],
+  );
 
-  // now we do things a little backwards... instead of the set of all filtered
-  // stops, we build a set of all interesting stops. that is because if a stop
-  // is served both by a filtered agency AND a local transit agency, then we
-  // want to include it.
-  const stopTimesReadableStream = createReadStream(resolve(unzippedGtfsPath, `stop_times.txt`), {encoding: 'utf8'})
-  const interestingStopIds = await getInterestingStopIds(filteredTripIds, stopTimesReadableStream);
-
-  // and now just aggregate all the interesting stop IDs as GeoJSON
-  const stopsReadableStream = createReadStream(resolve(unzippedGtfsPath, `stops.txt`), {encoding: 'utf8'});
-  const interestingStopsAsGeoJsonPoints = await getInterestingStopsAsGeoJsonPoints(interestingStopIds, stopsReadableStream);
+  const interestingStopsAsGeoJsonPoints = interestingStops.map(stop => ({
+    'type': 'Feature',
+    'geometry': {
+      'type': 'Point',
+      'coordinates': [stop.stop_lon, stop.stop_lat],
+    },
+    'properties': {},
+  }));
 
   const interestingStopsCollection = {
     type: 'FeatureCollection',
@@ -64,17 +73,8 @@ async function generateLocalTransitBounds(
   const bufferedHull = turfBuffer(convexHull, 5, {units: 'miles'});
 
   await writeFile(
-    resolve(boundsOutpoutPath, 'transit-service-area.json'),
+    resolve(boundsOutputPath, 'transit-service-area.json'),
     JSON.stringify(bufferedHull, null, 2),
     'utf8',
   );
-  
-  routesReadableStream.close();
-  tripsReadableStream.close();
-  stopTimesReadableStream.close();
-  stopsReadableStream.close();
 }
-
-module.exports = {
-  generateLocalTransitBounds,
-};

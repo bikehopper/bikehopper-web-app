@@ -1,5 +1,5 @@
-const { spawn } = require('node:child_process');
-const shell = require('shelljs');
+import { spawn } from 'node:child_process';
+import shell from 'shelljs';
 
 
 /**
@@ -13,7 +13,7 @@ const shell = require('shelljs');
  * @param {boolean} dontDropPoints 
  * @returns {Promise<void>} Resolves when the tileset generation is complete
  */
-async function runTippecanoe(
+export async function runTippecanoe(
   inputLDGeoJsonPath,
   tilesOutputPath,
   vectorLayerName,
@@ -59,7 +59,3 @@ async function runTippecanoe(
     }
   });
 }
-
-module.exports = {
-  runTippecanoe,
-};

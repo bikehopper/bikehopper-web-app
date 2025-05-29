@@ -1,7 +1,6 @@
-;
-const { getRouteTripShapeLookup } = require('./get-route-id-trip-id-shape-id-lookup');
-const { getShapesLookup } = require('./get-shapes-lookup');
-const { getStopsForTripLookup } = require('./get-trip-id-stop-ids-lookup');
+import getRouteTripShapeLookup from './get-route-id-trip-id-shape-id-lookup.js';
+import getShapesLookup from './get-shapes-lookup.js';
+import getStopsForTripLookup from './get-trip-id-stop-ids-lookup.js';
 
 /**
  * Computes 3 lookup tables:
@@ -19,7 +18,6 @@ const { getStopsForTripLookup } = require('./get-trip-id-stop-ids-lookup');
  * routeTripShapeLookup and shapeIdLineStringLookup provide enough information to generate a LineString for a
  * trip thats clipped between the entry and exit stops. 
  *
- * @param {string} unzippedGtfsPath path to unzipped gtfs text files
  * @return {Object} {
  *    routeTripShapeLookup: {<route-id, trip-id> : <shape-id>}, 
  *    shapeIdLineStringLookup: {<shape-id> : <LineString>},
@@ -28,15 +26,15 @@ const { getStopsForTripLookup } = require('./get-trip-id-stop-ids-lookup');
  *    stopIdTripIdsLookup: Map<<stop-id> : Set<<trip-id>>,
  * }
  */
-async function generateRouteLineClippingLookupTables(unzippedGtfsPath) {
+export default async function generateRouteLineClippingLookupTables() {
   console.log('Starting build of routeline clipping tables');
-  const {routeTripShapeLookup, tripRouteLookup} = await getRouteTripShapeLookup(unzippedGtfsPath);
+  const {routeTripShapeLookup, tripRouteLookup} = await getRouteTripShapeLookup();
   console.log('Built <route-id, trip-id> : <shape-id> table');
 
-  const shapeIdLineStringLookup = await getShapesLookup(unzippedGtfsPath);
+  const shapeIdLineStringLookup = await getShapesLookup();
   console.log('Built <shape-id> : <LineString> table');
 
-  const { tripIdStopIdsLookup, stopIdTripIdsLookup } = await getStopsForTripLookup(unzippedGtfsPath);
+  const { tripIdStopIdsLookup, stopIdTripIdsLookup } = await getStopsForTripLookup();
   console.log('Built <trip-id> : <stop-id[]> table');
 
   return {
@@ -46,8 +44,4 @@ async function generateRouteLineClippingLookupTables(unzippedGtfsPath) {
     tripRouteLookup,
     stopIdTripIdsLookup,
   };
-};
-
-module.exports = {
-  generateRouteLineClippingLookupTables,
 };

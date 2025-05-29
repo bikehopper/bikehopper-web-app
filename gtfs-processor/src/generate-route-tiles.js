@@ -1,9 +1,10 @@
-const { createReadStream, existsSync } = require('node:fs');
-const { appendFile, unlink, rm } = require('node:fs/promises');
-const { resolve, join } = require('path');
-const { parse } = require('csv-parse');
-const { lineString, point } = require('@turf/helpers');
-const { runTippecanoe } = require('./tippecanoe-helper');
+import { existsSync } from 'node:fs';
+import { appendFile, unlink, rm } from 'node:fs/promises';
+import { join } from 'path';
+import { lineString, point } from '@turf/helpers';
+import { getRoutes, getStops } from 'gtfs';
+
+import { runTippecanoe } from './tippecanoe-helper.js';
 
 
 /**
@@ -37,8 +38,8 @@ async function appendRouteLineStringToFile(
           const geojson = lineString(shape, {
             route_id: routeId,
             trip_ids: tripId, // comma-seperated list of trip-ids, MVT doesn't support arrays
-            route_color: `#${routeColor}`,
-            route_text_color: `#${routeTextColor}`,
+            route_color: routeColor ? `#${routeColor}` : null,
+            route_text_color: routeTextColor ? `#${routeTextColor}` : null,
           });
           seenShapes.set(shapeId, geojson);
         } else {
@@ -58,12 +59,12 @@ async function appendRouteLineStringToFile(
 /**
  * Appends all the stops to the LDGeoJson file
  * 
- * @param {*} stopsParser 
+ * @param {*} stops
  * @param {*} ldGeoJsonPath 
  * @param {*} routeLineLookups 
  * @param {*} routeTypeLookup
  */
-async function appendStops(stopsParser, ldGeoJsonPath, routeLineLookups, routeTypeLookup) {
+async function appendStops(stops, ldGeoJsonPath, routeLineLookups, routeTypeLookup) {
   // taken from https://gtfs.org/documentation/schedule/reference/#routestxt
   const ROUTE_TYPE_TO_STRING = {
     0: 'tram',
@@ -80,7 +81,7 @@ async function appendStops(stopsParser, ldGeoJsonPath, routeLineLookups, routeTy
 
   // Helper function that uses the lookup tables to infer all the route-types that are accesible at a stop
   const getRouteTypesForStop = (stopId) => {
-    const { tripRouteLookup, stopIdTripIdsLookup } =  routeLineLookups;
+    const { tripRouteLookup, stopIdTripIdsLookup } = routeLineLookups;
     const tripsForStop = stopIdTripIdsLookup.get(stopId);
     // Use set to de-dup route-types
     const routeTypes = new Set();
@@ -107,7 +108,7 @@ async function appendStops(stopsParser, ldGeoJsonPath, routeLineLookups, routeTy
     return routeTypes;
   };
 
-  for await(const stop of stopsParser) {
+  for (const stop of stops) {
     const stopId = stop['stop_id'];
     const stopName = stop['stop_name'];
     const lat = parseFloat(stop['stop_lat']);
@@ -123,23 +124,19 @@ async function appendStops(stopsParser, ldGeoJsonPath, routeLineLookups, routeTy
         for (const routeType of routeTypesAtStop.values()) {
           properties[routeType] = true;
         }
-  
+
         const geojson = point([lon, lat], properties);
-  
+
         await appendFile(ldGeoJsonPath, JSON.stringify(geojson)+'\n');
-      } else {
-        console.log(`Dropped stop-id: ${stopId}, name: ${stopName} because no routes/trips were detected at the stop`);
       }
     }
   }
 }
 
-async function generateRouteTiles(
+export default async function generateRouteTiles(
   routelineLookups,
-  unzippedGtfsPath,
   outputPath,
 ) {
-  
   const routeLinesLDGeoJsonPath = join(outputPath, 'routelines.ldgeojson');
   if (existsSync(routeLinesLDGeoJsonPath)) {
     await unlink(routeLinesLDGeoJsonPath);
@@ -150,11 +147,10 @@ async function generateRouteTiles(
     await unlink(stopLDGeoJsonPath);
   }
   
-  console.log('Staring creation of LDGeoJSON');
-  const routesStream = createReadStream(resolve(unzippedGtfsPath, 'routes.txt'), {encoding: 'utf8'});
-  const routesParser = routesStream.pipe(parse({columns: true}));
+  console.log('Starting creation of LDGeoJSON');
+  const routes = getRoutes();
   const routeTypes = new Map();
-  for await(const route of routesParser) {
+  for (const route of routes) {
     await appendRouteLineStringToFile(route, routeLinesLDGeoJsonPath, routelineLookups);
 
     const routeId = route['route_id'];
@@ -165,9 +161,7 @@ async function generateRouteTiles(
   }
   console.log('Finished adding route LineStrings LDGeoJSON');
 
-  const stopsStream = createReadStream(resolve(unzippedGtfsPath, 'stops.txt'), {encoding: 'utf8'});
-  const stopsParser = stopsStream.pipe(parse({columns: true}));
-  await appendStops(stopsParser, stopLDGeoJsonPath, routelineLookups, routeTypes);
+  await appendStops(getStops(), stopLDGeoJsonPath, routelineLookups, routeTypes);
 
   console.log('Finished addings stop points to LDGeoJSON');
 
@@ -187,7 +181,3 @@ async function generateRouteTiles(
     throw e;
   }
 }
-
-module.exports = {
-  generateRouteTiles,
-};

@@ -1,25 +1,19 @@
-const { createReadStream } = require('node:fs');
-const { resolve } = require("path");
-const { parse } = require('csv-parse');
-
+import { getStoptimes } from 'gtfs';
 
 /**
  * Loops over `stop_times.txt` and generates a lookup table, where the key is a trip-id,
  * and the value is an Array of stop-ids on that trip.
- * 
- * @param {*} unzippedGtfsPath 
+ *
  * @returns {Object} {
  *    tripIdStopIdsLookup: <trip-id>: <stop-id>[],
  *    stopIdTripIdsLookup: Map<<stop-id>, Set<trip-id>>
  * }
  */
-async function getStopsForTripLookup(unzippedGtfsPath){
-  const stopTimesStream = createReadStream(resolve(unzippedGtfsPath, 'stop_times.txt'), {encoding: 'utf8'});
-  const parser = stopTimesStream.pipe(parse({columns: true}));
+export default async function getStopsForTripLookup() {
   const tripIdStopIdsLookup = {};
   // Don't need to serialize the <stop-id> : <trip-ids>[] lookup, so use a Map
   const stopIdTripIdsLookup = new Map();
-  for await (const stopTime of parser) {
+  for (const stopTime of getStoptimes({}, ['stop_id', 'trip_id'])) {
     const stopId = stopTime['stop_id'];
     const tripId = stopTime['trip_id'];
     if (tripId && stopId) {
@@ -44,7 +38,3 @@ async function getStopsForTripLookup(unzippedGtfsPath){
 
   return { tripIdStopIdsLookup, stopIdTripIdsLookup };
 }
-
-module.exports = {
-  getStopsForTripLookup,
-};

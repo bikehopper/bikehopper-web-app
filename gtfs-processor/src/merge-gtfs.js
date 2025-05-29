@@ -1,5 +1,6 @@
-const { join, basename } = require('node:path');
-const { readdir } = require('node:fs/promises');
+import { join, basename } from 'node:path';
+import { readdir } from 'node:fs/promises';
+
 const skipRecordsWithError = process.env.SKIP_RECORDS_WITH_ERROR === 'true' || false;
 
 (async () => {
