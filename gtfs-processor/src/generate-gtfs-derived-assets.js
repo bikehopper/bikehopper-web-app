@@ -7,6 +7,7 @@ import { closeDb, importGtfs, openDb } from 'gtfs';
 import generateLocalTransitBounds from './generate-local-transit-bounds.js';
 import generateRouteLineClippingLookupTables from './generate-route-line-clipping-lookup-tables.js';
 import generateRouteTiles from './generate-route-tiles.js';
+import processElevatorInfo from './process-elevator-info.js';
 
 /*
  * This script generates several assets from the GTFS zip file.
@@ -28,6 +29,8 @@ const ENV_MANUALLY_FILTERED_ROUTE_IDS = process.env.MANUALLY_FILTERED_ROUTE_IDS 
 
 // Initialize temprary folders to hold gtfs files
 const gtfsFilePath = resolve(process.env.GTFS_ZIP_PATH);
+const elevatorInfoPath = process.env.ELEVATOR_INFO_PATH &&
+  resolve(process.env.ELEVATOR_INFO_PATH);
 const outputPath = resolve(process.env.OUTPUT_DIR_PATH);
 const sqlitePath = resolve(outputPath, 'gtfs.db');
 
@@ -76,6 +79,17 @@ await generateLocalTransitBounds(
 );
 
 console.log(`Finished writing transit-service-area.json to: ${outputPath}`)
+
+// Generate elevators.json
+if (elevatorInfoPath) {
+  console.log(`Processing elevator info from ${elevatorInfoPath}`);
+  const elevatorInfo = processElevatorInfo(elevatorInfoPath, outputPath);
+  const elevOutputPath = resolve(outputPath, 'elevators.json');
+  await writeFile(elevOutputPath, JSON.stringify(elevatorInfo), 'utf8');
+  console.log(`Finished writing elevator info to: ${elevOutputPath}`)
+} else {
+  console.log('No elevator info defined; skipping');
+}
 
 // Generate route-line-lookup.json
 const routelineLookups = await generateRouteLineClippingLookupTables(gtfsDb);
