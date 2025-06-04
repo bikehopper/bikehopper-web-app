@@ -1,7 +1,7 @@
 import { mkdtemp } from 'node:fs/promises';
 import { resolve, join } from 'node:path';
 import { tmpdir } from 'node:os';
-import { writeFile } from 'node:fs/promises';
+import { writeFile, stat } from 'node:fs/promises';
 import { closeDb, importGtfs, openDb } from 'gtfs';
 
 import generateLocalTransitBounds from './generate-local-transit-bounds.js';
@@ -43,7 +43,29 @@ const gtfsImportConfig = {
   ],
   sqlitePath,
 };
-await importGtfs(gtfsImportConfig);
+
+// Import the GTFS zip to a DB, but skip if GTFS DB already exists and is
+// newer than zip.
+const gtfsZipModificationTime = (await stat(gtfsFilePath)).mtimeMs;
+let gtfsDbModificationTime;
+try {
+  gtfsDbModificationTime = (await stat(sqlitePath)).mtimeMs;
+} catch(e) {
+  // File not found is normal. Rethrow any other errors
+  if (e?.code !== 'ENOENT' || e?.syscall !== 'stat') {
+    throw e;
+  }
+}
+if (
+  gtfsDbModificationTime == null
+  || gtfsZipModificationTime >= gtfsDbModificationTime
+) {
+  console.log('Importing GTFS DB');
+  await importGtfs(gtfsImportConfig);
+} else {
+  console.log('Skipping GTFS DB import: DB already newer than zip');
+}
+
 const gtfsDb = openDb(gtfsImportConfig);
 
 // Generate transit-service-area.json
