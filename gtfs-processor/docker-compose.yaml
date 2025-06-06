@@ -7,9 +7,9 @@ services:
       replicas: 1
       resources:
         limits:
-          memory: 256M
+          memory: 1024M
         reservations:
-          memory: 128M
+          memory: 512M
     environment:
       FILTERED_AGENCY_IDS: "${FILTERED_AGENCY_IDS}"
       MANUALLY_FILTERED_ROUTE_IDS: "${MANUALLY_FILTERED_ROUTE_IDS}"
@@ -18,8 +18,8 @@ services:
     volumes:
       - "${GTFS_ZIP_PATH}:/usr/app/mnts/gtfs.zip"
       - "${OUTPUT_DIR_PATH}:/usr/app/mnts/output"
-    image: ghcr.io/bikehopper/gtfs-processor:v1.0.2
-    command: "node /app/src/generateLocalTransitBounds.js"
+    image: ghcr.io/bikehopper/gtfs-processor:v1.3.0
+    command: "node /app/src/generate-gtfs-derived-assets.js"
     build: .
 
   bikehopper-gtfs-merge:
