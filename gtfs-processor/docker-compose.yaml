@@ -6,8 +6,6 @@ services:
         condition: none
       replicas: 1
       resources:
-        limits:
-          memory: 1024M
         reservations:
           memory: 512M
     environment:
@@ -18,7 +16,7 @@ services:
     volumes:
       - "${GTFS_ZIP_PATH}:/usr/app/mnts/gtfs.zip"
       - "${OUTPUT_DIR_PATH}:/usr/app/mnts/output"
-    image: ghcr.io/bikehopper/gtfs-processor:v1.3.0
+    image: ghcr.io/bikehopper/gtfs-processor:v1.4.1
     command: "node /app/src/generate-gtfs-derived-assets.js"
     build: .
 
