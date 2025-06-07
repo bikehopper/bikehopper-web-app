@@ -4,6 +4,7 @@ import logger from '../lib/logger.js';
 import * as gtfsRtClient from '../gtfs-rt/client.js';
 import { mergeAlertsIntoRoutes } from '../gtfs-rt/alerts.js';
 import { replacePtRouteLinesWithHighres } from '../lib/route-linestring.js';
+import { mergeElevatorInfoIntoRoutes } from '../lib/elevators.js';
 
 const router = express.Router();
 router.use((req, res, next) => {
@@ -33,7 +34,11 @@ router.get('/route-pt', async (req, res) => {
     if (alertResult.status === 'rejected') logger.error(alertResult.reason);
 
     const routesWithAlerts = mergeAlertsIntoRoutes(alertResult.value, graphHopperResult.value.data);
-    res.json(replacePtRouteLinesWithHighres(routesWithAlerts));
+    res.json(
+      mergeElevatorInfoIntoRoutes(
+        replacePtRouteLinesWithHighres(routesWithAlerts)
+      )
+    );
   } catch (error) {
     logger.error(error);
     if (error.response) {
