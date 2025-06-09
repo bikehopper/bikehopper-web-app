@@ -16,5 +16,6 @@
     "alerts": "https://api.511.org/transit/servicealerts?agency=RG",
     "vehiclePositions": "https://api.511.org/transit/vehiclepositions?agency=RG",
     "tripUpdates": "https://api.511.org/transit/tripupdates?agency=RG"
-  }
+  },
+  "timezone": "America/Los_Angeles"
 }
