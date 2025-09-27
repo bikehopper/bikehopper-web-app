@@ -1,5 +1,5 @@
 {
-  "name": "bikehopper-app",
+  "name": "bikehopper-web-app",
   "version": "0.1.0",
   "description": "BikeHopper application server",
   "main": "src/index.js",
@@ -9,20 +9,24 @@
     "start": "npm run build && docker run -p 3001:3001 -p 9229:9229 -e PORT=3001 -e PROTOCOL=http -e GRAPHHOPPER_SERVICE_NAME=api.bikehopper -e PHOTON_SERVICE_NAME=api.bikehopper -e NOMINATIM_SERVICE_NAME=api.bikehopper -e FILE_SERVICE_NAME=api.bikehopper -e NAMESPACE=staging -e HOSTNAME=techlabor.org/v1 -e NODE_ENV=development --rm -v .:/app -it bikehopper-app:dev",
     "start-nodocker": "NODE_ENV=development PROTOCOL=http GRAPHHOPPER_SERVICE_NAME=localhost:8989 NAMESPACE= HOSTNAME= PORT=3001 node --inspect=127.0.0.1:9229 src/index.js",
     "start-nodemon": "docker compose up --build bikehopper-web-app",
+    "gtfs-process": "NODE_ENV=development node ./gtfs-processor/src/generate-gtfs-derived-assets.js",
     "test": "npm t"
   },
-  "author": "Andy McCoy",
+  "author": "BikeHopper team",
   "license": "AGPL-3.0-or-later",
   "engines": {
-    "node": ">=18"
+    "node": ">=22"
   },
   "dependencies": {
     "@keyv/redis": "^2.8.4",
+    "@turf/buffer": "^7.2.0",
+    "@turf/convex": "^7.2.0",
     "@turf/helpers": "^7.1.0",
     "@turf/line-slice": "^7.1.0",
     "axios": "^1.6.8",
     "body-parser": "^1.19.1",
     "compare-versions": "^6.0.0-rc.1",
+    "csv-parse": "^5.6.0",
     "dotenv": "^16.0.3",
     "dotenv-expand": "^10.0.0",
     "express": "^4.17.2",
@@ -31,11 +35,13 @@
     "gtfs-realtime-bindings": "^1.1.1",
     "helmet": "^5.0.2",
     "keyv": "^4.5.4",
+    "lodash": "^4.17.21",
     "luxon": "^3.2.1",
     "pino": "^8.7.0",
     "pino-http": "^8.2.1",
     "pino-http-print": "^3.1.0",
-    "ramda": "^0.29.1"
+    "ramda": "^0.29.1",
+    "shelljs": "^0.10.0"
   },
   "devDependencies": {
     "nodemon": "^3.1.0"

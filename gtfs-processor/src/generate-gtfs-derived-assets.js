@@ -9,6 +9,14 @@ import generateRouteLineClippingLookupTables from './generate-route-line-clippin
 import generateRouteTiles from './generate-route-tiles.js';
 import processElevatorInfo from './process-elevator-info.js';
 
+import {
+  FILTERED_AGENCY_IDS as ENV_FILTERED_AGENCY_IDS,
+  MANUALLY_FILTERED_ROUTE_IDS as ENV_MANUALLY_FILTERED_ROUTE_IDS,
+  GTFS_ZIP_PATH,
+  ELEVATOR_INFO_PATH,
+  OUTPUT_DIR_PATH,
+} from '../../src/config.js';
+
 /*
  * This script generates several assets from the GTFS zip file.
  * These assets are used in bikehopper-web-app to expose some data from the GTFS files.
@@ -24,14 +32,11 @@ import processElevatorInfo from './process-elevator-info.js';
  */
 
 const requiredGTFSFiles = new Set(['routes.txt', 'trips.txt', 'stop_times.txt', 'stops.txt', 'shapes.txt']);
-const ENV_FILTERED_AGENCY_IDS = process.env.FILTERED_AGENCY_IDS || '';
-const ENV_MANUALLY_FILTERED_ROUTE_IDS = process.env.MANUALLY_FILTERED_ROUTE_IDS || '';
 
 // Initialize temprary folders to hold gtfs files
-const gtfsFilePath = resolve(process.env.GTFS_ZIP_PATH);
-const elevatorInfoPath = process.env.ELEVATOR_INFO_PATH &&
-  resolve(process.env.ELEVATOR_INFO_PATH);
-const outputPath = resolve(process.env.OUTPUT_DIR_PATH);
+const gtfsFilePath = resolve(GTFS_ZIP_PATH);
+const elevatorInfoPath = ELEVATOR_INFO_PATH && resolve(ELEVATOR_INFO_PATH);
+const outputPath = resolve(OUTPUT_DIR_PATH);
 const sqlitePath = resolve(outputPath, 'gtfs.db');
 
 const gtfsImportConfig = {

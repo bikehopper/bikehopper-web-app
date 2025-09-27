@@ -75,3 +75,10 @@ export const ALERTS_CACHE_TIME_MSEC = (
 
 export const MAPBOX_ACCESS_TOKEN = isEmpty(process.env.MAPBOX_ACCESS_TOKEN) ? null : process.env.MAPBOX_ACCESS_TOKEN;
 export const MAPBOX_STYLE_URL = isEmpty(process.env.MAPBOX_STYLE_URL) ? null : process.env.MAPBOX_STYLE_URL;
+
+export const FILTERED_AGENCY_IDS = process.env.FILTERED_AGENCY_IDS || '';
+export const MANUALLY_FILTERED_ROUTE_IDS = process.env.MANUALLY_FILTERED_ROUTE_IDS || '';
+export const GTFS_ZIP_PATH = process.env.GTFS_ZIP_PATH;
+export const ELEVATOR_INFO_PATH = process.env.ELEVATOR_INFO_PATH;
+export const OUTPUT_DIR_PATH = process.env.OUTPUT_DIR_PATH;
+export const SKIP_RECORDS_WITH_ERROR = Boolean(process.env.SKIP_RECORDS_WITH_ERROR);

@@ -9,3 +9,6 @@ volumes
 .env
 
 config
+gtfs
+output
+geojson
