@@ -119,6 +119,12 @@ async function appendStops(stops, ldGeoJsonPath, routeLineLookups, routeTypeLook
         stop_name: stopName,
         stop_id: stopId,
       };
+      if (stop['parent_station']) {
+        const parentStop = getStops({stop_id: stop['parent_station']})[0];
+        if (parentStop?.stop_name) {
+          properties.stop_name = parentStop.stop_name;
+        }
+      }
       const routeTypesAtStop = getRouteTypesForStop(stopId);
       if (routeTypesAtStop.size > 0) {
         for (const routeType of routeTypesAtStop.values()) {
