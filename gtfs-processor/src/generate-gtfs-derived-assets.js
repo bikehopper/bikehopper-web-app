@@ -112,10 +112,15 @@ await writeFile(
 
 console.log(`Finished writing route-line-lookup.json to: ${outputPath}`)
 
-await generateRouteTiles(
-  routelineLookups,
-  outputPath,
-);
+try {
+  await generateRouteTiles(
+    routelineLookups,
+    outputPath,
+  );
+  console.log(`Finished writing /route-tiles to: ${outputPath}`)
+} catch(e) {
+  console.error('Failed to generate route tiles');
+  console.error(e);
+}
 
-console.log(`Finished writing /route-tiles to: ${outputPath}`)
 closeDb(gtfsDb);
