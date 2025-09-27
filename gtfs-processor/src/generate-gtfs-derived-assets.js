@@ -1,7 +1,7 @@
 import { mkdtemp } from 'node:fs/promises';
 import { resolve, join } from 'node:path';
 import { tmpdir } from 'node:os';
-import { writeFile, stat } from 'node:fs/promises';
+import { mkdir, writeFile, stat } from 'node:fs/promises';
 import { closeDb, importGtfs, openDb } from 'gtfs';
 
 import generateLocalTransitBounds from './generate-local-transit-bounds.js';
@@ -14,7 +14,7 @@ import {
   MANUALLY_FILTERED_ROUTE_IDS as ENV_MANUALLY_FILTERED_ROUTE_IDS,
   GTFS_ZIP_PATH,
   ELEVATOR_INFO_PATH,
-  OUTPUT_DIR_PATH,
+  GEO_CONFIG_FOLDER_PATH,
 } from '../../src/config.js';
 
 /*
@@ -36,7 +36,8 @@ const requiredGTFSFiles = new Set(['routes.txt', 'trips.txt', 'stop_times.txt', 
 // Initialize temprary folders to hold gtfs files
 const gtfsFilePath = resolve(GTFS_ZIP_PATH);
 const elevatorInfoPath = ELEVATOR_INFO_PATH && resolve(ELEVATOR_INFO_PATH);
-const outputPath = resolve(OUTPUT_DIR_PATH);
+const outputPath = resolve(GEO_CONFIG_FOLDER_PATH);
+await mkdir(outputPath, { recursive: true });
 const sqlitePath = resolve(outputPath, 'gtfs.db');
 
 const gtfsImportConfig = {
