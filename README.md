@@ -7,16 +7,20 @@ Lightweight Node.js proxy for BikeHopper backends. See
 
 Install these prerequisites:
 - npm and Node 22+ (for example, using [nvm](https://github.com/nvm-sh/nvm#installing-and-updating)),
-- Docker (for example, using Docker Desktop for [Windows](https://docs.docker.com/desktop/windows/install/), [Mac](https://docs.docker.com/desktop/mac/install/))
 
 Then:
 - `git clone` this repo
+- `git submodule init` to get tippecanoe
 - `npm install`
-- Ensure Docker Desktop or another Docker daemon is running.
+- Copy `.env.template` to `env.development.local` and add appropriate values for local development
+- Copy `region-config-example.json` and modify it for your region
+- Put a GTFS feed dump in place
 
 ## How to use
 
-Run `npm start` to start the app. The Node server will start printing logs to the console.
+To process the GTFS feed, run `npm run gtfs-process`.
+
+Then run `npm run start-nodocker` to start the app. The Node server will start printing logs to the console.
 
 In another terminal, `curl localhost:3001/health` to ensure the server is performing correctly.
 
@@ -111,13 +115,3 @@ Ingests a static GTFS feed and outputs useful geoJSON files. It supports excludi
     }
 ],
 ```
-
-## Getting Started with the GTFS Processor
-
-(TODO: Update these instructions)
-
-Clone this repo, set values in a `.env` file, then run `docker compose up`.
-
-1. Clone this repo
-2. Run `cp .env.example .env`. Fill `FILTERED_AGENCY_IDS` and `MANUALLY_FILTERED_ROUTE_IDS` with a comma seprated list of agency IDs you'd like to exclude. You can leave these blank if you dont know.
-3. Run `docker compose up`, if it exists succesfully check `./volumes/output` for JSON.
