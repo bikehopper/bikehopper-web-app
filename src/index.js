@@ -5,7 +5,7 @@ import pinoHttp from 'pino-http';
 import { satisfies } from 'compare-versions';
 
 import logger from './lib/logger.js';
-import { WEB_APP_GEO_CONFIG_FOLDER_CONTAINER_PATH, PORT as port } from './config.js';
+import { GEO_CONFIG_FOLDER_PATH, PORT as port } from './config.js';
 
 import { router as graphHopperRouter } from './graphhopper/index.js';
 import { router as photonRouter } from './photon/index.js';
@@ -108,7 +108,7 @@ async function initApp() {
 
   // Expose static endpoint for tileset containing route-lines
   const routeTiles = express.static(
-    path.join(WEB_APP_GEO_CONFIG_FOLDER_CONTAINER_PATH, 'route-tiles'),
+    path.join(GEO_CONFIG_FOLDER_PATH, 'route-tiles'),
     staticTilesOpts
   );
   app.use('/v1/route-tiles', routeTiles);
@@ -116,7 +116,7 @@ async function initApp() {
   
   // Expose static endpoint for tileset containing stop points
   const stopTiles = express.static(
-    path.join(WEB_APP_GEO_CONFIG_FOLDER_CONTAINER_PATH, 'stop-tiles'),
+    path.join(GEO_CONFIG_FOLDER_PATH, 'stop-tiles'),
     staticTilesOpts
   );
   app.use('/v1/stop-tiles', stopTiles);

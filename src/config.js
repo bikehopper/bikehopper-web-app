@@ -48,8 +48,7 @@ export const NAMESPACE = process.env.NAMESPACE;
 export const HOSTNAME = process.env.HOSTNAME;
 export const PHOTON_SERVICE_NAME = process.env.PHOTON_SERVICE_NAME;
 export const NOMINATIM_SERVICE_NAME = process.env.NOMINATIM_SERVICE_NAME;
-export const WEB_APP_GEO_CONFIG_FOLDER_CONTAINER_PATH = isEmpty(process.env.WEB_APP_GEO_CONFIG_FOLDER_CONTAINER_PATH) ? '/mnt/geoconfig' : process.env.WEB_APP_GEO_CONFIG_FOLDER_CONTAINER_PATH;
-export const WEB_APP_REGION_CONFIG_PATH = isEmpty(process.env.WEB_APP_REGION_CONFIG_PATH) ? '/mnt/region-config.json' : process.env.WEB_APP_REGION_CONFIG_PATH;
+export const GEO_CONFIG_FOLDER_PATH = process.env.GEO_CONFIG_FOLDER_PATH;
 export const CACHE_CONN_STRING = isEmpty(process.env.CACHE_CONN_STRING) ? undefined : process.env.CACHE_CONN_STRING;
 
 export const GTFS_REALTIME_TOKEN = isEmpty(process.env.GTFS_REALTIME_TOKEN) ? null : process.env.GTFS_REALTIME_TOKEN;
@@ -57,7 +56,7 @@ export const GTFS_REALTIME_VEHICLE_POSITION_TOKEN = isEmpty(process.env.GTFS_REA
 export const GTFS_REALTIME_TRIP_UPDATES_TOKEN = isEmpty(process.env.GTFS_REALTIME_TRIP_UPDATES_TOKEN) ? null : process.env.GTFS_REALTIME_TRIP_UPDATES_TOKEN;
 export const GTFS_REALTIME_SERVICE_ALERTS_TOKEN = isEmpty(process.env.GTFS_REALTIME_SERVICE_ALERTS_TOKEN) ? null : process.env.GTFS_REALTIME_SERVICE_ALERTS_TOKEN;
 
-const regionConfig = JSON.parse(fs.readFileSync(WEB_APP_REGION_CONFIG_PATH, 'utf8'));
+const regionConfig = JSON.parse(fs.readFileSync(process.env.REGION_CONFIG_PATH, 'utf8'));
 
 export const REGION_CONFIG = regionConfig;
 
