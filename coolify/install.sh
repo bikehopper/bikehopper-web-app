@@ -25,3 +25,4 @@ then
 fi
 mkdir -p input
 npx --yes @bikehopper/data-mirror -o input # download data
+npm install
