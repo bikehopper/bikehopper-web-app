@@ -24,5 +24,5 @@ then
     nvm use 22
 fi
 mkdir -p input
-npx --yes @bikehopper/data-mirror -o input # download data
+npx --yes @bikehopper/data-mirror -f gtfs -o input # download data
 npm install
