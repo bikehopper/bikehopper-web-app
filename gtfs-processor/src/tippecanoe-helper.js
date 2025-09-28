@@ -24,6 +24,7 @@ export async function runTippecanoe(
   return new Promise((resolve, reject) => {
     if (!shell.which('tippecanoe')) {
       reject(new Error('tippecanoe is not installed and available on PATH'));
+      return;
     }
 
     const params = ['-e', tilesOutputPath, '-l', vectorLayerName, '-P', `-Z${minZoom}`, '-U', 3];
