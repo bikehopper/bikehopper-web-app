@@ -62,6 +62,10 @@ async function initApp() {
     if (process.env.ALLOW_ORIGIN) {
       res.set('access-control-allow-origin', process.env.ALLOW_ORIGIN);
     }
+    const accessControlRequestHeaders = req.get('access-control-request-headers');
+    if (accessControlRequestHeaders) {
+      res.set('access-control-allow-headers', accessControlRequestHeaders);
+    }
   
     // you only want to cache for GET requests
     if (req.method == 'GET') {
