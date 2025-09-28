@@ -1,1 +1,1 @@
-npm run gtfs-process && npm run start-nodocker
+npm run gtfs-process && node src/index.js
