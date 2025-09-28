@@ -1,4 +1,5 @@
 import { spawn } from 'node:child_process';
+import { existsSync } from 'node:fs';
 import shell from 'shelljs';
 
 
@@ -22,7 +23,8 @@ export async function runTippecanoe(
   dontDropPoints
 ) {
   return new Promise((resolve, reject) => {
-    if (!shell.which('tippecanoe')) {
+    const tippeCanoePath = './gtfs-processor/submodule-deps/tippecanoe/tippecanoe';
+    if (!existsSync(tippeCanoePath)) {
       reject(new Error('tippecanoe is not installed and available on PATH'));
       return;
     }
@@ -38,7 +40,7 @@ export async function runTippecanoe(
 
     console.log(`Running tippecanoe ${params.join(' ')}`);
     try {
-      const proc = spawn('tippecanoe', params);
+      const proc = spawn(tippeCanoePath, params);
       proc.stdout.on('data', (data) => {
         console.log(`${data}`);
       });
