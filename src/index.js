@@ -58,6 +58,10 @@ async function initApp() {
       res.set('access-control-allow-origin', '*');
       res.set('access-control-allow-methods', '*');
     }
+
+    if (process.env.ALLOW_ORIGIN) {
+      res.set('access-control-allow-origin', process.env.ALLOW_ORIGIN);
+    }
   
     // you only want to cache for GET requests
     if (req.method == 'GET') {
