@@ -34,7 +34,8 @@ async function initApp() {
   app.use(bodyParser.json());
   
   // basic api hardening
-  app.use(helmet());
+  // use same-site not same-origin so different subdomains can access
+  app.use(helmet({ crossOriginResourcePolicy: { policy: 'same-site' } }));
   
   // used by k8s for health checks
   app.get('/health', (req, res) => {
