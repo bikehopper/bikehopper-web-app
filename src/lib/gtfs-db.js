@@ -1,14 +1,14 @@
 import { join } from 'node:path';
 import { getStops, openDb } from 'gtfs';
 
-import { WEB_APP_GEO_CONFIG_FOLDER_CONTAINER_PATH } from '../config.js';
+import { GEO_CONFIG_FOLDER_PATH } from '../config.js';
 
 let _db;
 
 export function ensureGtfsDb() {
   if (_db === undefined) {
     _db = openDb({
-      sqlitePath: join(WEB_APP_GEO_CONFIG_FOLDER_CONTAINER_PATH, 'gtfs.db'),
+      sqlitePath: join(GEO_CONFIG_FOLDER_PATH, 'gtfs.db'),
     });
   }
   return _db;

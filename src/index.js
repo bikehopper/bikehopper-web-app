@@ -5,7 +5,7 @@ import pinoHttp from 'pino-http';
 import { satisfies } from 'compare-versions';
 
 import logger from './lib/logger.js';
-import { WEB_APP_GEO_CONFIG_FOLDER_CONTAINER_PATH, PORT as port } from './config.js';
+import { GEO_CONFIG_FOLDER_PATH, PORT as port } from './config.js';
 
 import { router as graphHopperRouter } from './graphhopper/index.js';
 import { router as photonRouter } from './photon/index.js';
@@ -34,7 +34,8 @@ async function initApp() {
   app.use(bodyParser.json());
   
   // basic api hardening
-  app.use(helmet());
+  // use same-site not same-origin so different subdomains can access
+  app.use(helmet({ crossOriginResourcePolicy: { policy: 'same-site' } }));
   
   // used by k8s for health checks
   app.get('/health', (req, res) => {
@@ -56,6 +57,14 @@ async function initApp() {
       res.set('access-control-allow-headers', '*');
       res.set('access-control-allow-origin', '*');
       res.set('access-control-allow-methods', '*');
+    }
+
+    if (process.env.ALLOW_ORIGIN) {
+      res.set('access-control-allow-origin', process.env.ALLOW_ORIGIN);
+    }
+    const accessControlRequestHeaders = req.get('access-control-request-headers');
+    if (accessControlRequestHeaders) {
+      res.set('access-control-allow-headers', accessControlRequestHeaders);
     }
   
     // you only want to cache for GET requests
@@ -108,7 +117,7 @@ async function initApp() {
 
   // Expose static endpoint for tileset containing route-lines
   const routeTiles = express.static(
-    path.join(WEB_APP_GEO_CONFIG_FOLDER_CONTAINER_PATH, 'route-tiles'),
+    path.join(GEO_CONFIG_FOLDER_PATH, 'route-tiles'),
     staticTilesOpts
   );
   app.use('/v1/route-tiles', routeTiles);
@@ -116,7 +125,7 @@ async function initApp() {
   
   // Expose static endpoint for tileset containing stop points
   const stopTiles = express.static(
-    path.join(WEB_APP_GEO_CONFIG_FOLDER_CONTAINER_PATH, 'stop-tiles'),
+    path.join(GEO_CONFIG_FOLDER_PATH, 'stop-tiles'),
     staticTilesOpts
   );
   app.use('/v1/stop-tiles', stopTiles);

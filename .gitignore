@@ -5,7 +5,9 @@ node_modules
 .env.development.local
 .env.test.local
 .env.production.local
-volumes
 .env
 
 config
+gtfs
+input
+geojson

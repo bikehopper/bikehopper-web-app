@@ -4,13 +4,13 @@ import logger from './logger.js';
 
 import { lineSlice } from '@turf/line-slice';
 import { lineString, point } from '@turf/helpers';
-import { WEB_APP_GEO_CONFIG_FOLDER_CONTAINER_PATH } from '../config.js';
+import { GEO_CONFIG_FOLDER_PATH } from '../config.js';
 
 let lookupTables = null;
 
 export async function loadLookupTables() {
   try {
-    const ROUTELINE_LOOKUP_PATH = join(WEB_APP_GEO_CONFIG_FOLDER_CONTAINER_PATH, 'route-line-lookup.json');
+    const ROUTELINE_LOOKUP_PATH = join(GEO_CONFIG_FOLDER_PATH, 'route-line-lookup.json');
     const contents = await readFile(resolve(ROUTELINE_LOOKUP_PATH), { encoding: 'utf8' });
     lookupTables = JSON.parse(contents);
     logger.info('Loaded lookup tables for generated highres routelines');

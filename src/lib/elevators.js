@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
-import { WEB_APP_GEO_CONFIG_FOLDER_CONTAINER_PATH } from '../config.js';
+import { GEO_CONFIG_FOLDER_PATH } from '../config.js';
 import logger from './logger.js';
 import { getParentStationStopId } from './gtfs-db.js';
 
@@ -11,7 +11,7 @@ function _getElevatorInfo() {
   if (_elevatorInfo === undefined) {
     try {
       const elevInfoPath = join(
-        WEB_APP_GEO_CONFIG_FOLDER_CONTAINER_PATH,
+        GEO_CONFIG_FOLDER_PATH,
         'elevators.json'
       );
       _elevatorInfo = JSON.parse(readFileSync(elevInfoPath, 'utf8'));

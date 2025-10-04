@@ -5,7 +5,7 @@ import {
   MAPBOX_ACCESS_TOKEN,
   MAPBOX_STYLE_URL,
   REGION_CONFIG,
-  WEB_APP_GEO_CONFIG_FOLDER_CONTAINER_PATH,
+  GEO_CONFIG_FOLDER_PATH,
 } from '../config.js';
 
 const router = express.Router();
@@ -16,7 +16,7 @@ router.get('/', async (req, res) => {
   if (!transitServiceArea) {
     try {
       const fileContents = await readFile(join(
-        WEB_APP_GEO_CONFIG_FOLDER_CONTAINER_PATH,
+        GEO_CONFIG_FOLDER_PATH,
         'transit-service-area.json',
       ), { encoding: 'utf8' });
       transitServiceArea = JSON.parse(fileContents);
