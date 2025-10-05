@@ -4,7 +4,7 @@ import { join } from 'path';
 import { lineString, point } from '@turf/helpers';
 import { getRoutes, getStops } from 'gtfs';
 
-import { runTippecanoe } from './tippecanoe-helper.js';
+import runTippecanoe  from '@bikehopper/node-tippecanoe';
 
 
 /**

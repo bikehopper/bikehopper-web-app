@@ -5,10 +5,9 @@
   "main": "src/index.js",
   "type": "module",
   "scripts": {
-    "build": "docker build -q -f Dockerfile.dev -t bikehopper-app:dev .",
-    "start": "npm run build && docker run -p 3001:3001 -p 9229:9229 -e PORT=3001 -e PROTOCOL=http -e GRAPHHOPPER_SERVICE_NAME=api.bikehopper -e PHOTON_SERVICE_NAME=api.bikehopper -e NOMINATIM_SERVICE_NAME=api.bikehopper -e FILE_SERVICE_NAME=api.bikehopper -e NAMESPACE=staging -e HOSTNAME=techlabor.org/v1 -e NODE_ENV=development --rm -v .:/app -it bikehopper-app:dev",
-    "start-nodocker": "NODE_ENV=development PROTOCOL=http GRAPHHOPPER_SERVICE_NAME=localhost:8989 NAMESPACE= HOSTNAME= PORT=3001 node --inspect=127.0.0.1:9229 src/index.js",
-    "start-nodemon": "docker compose up --build bikehopper-web-app",
+    "postinstall": "sync-data -f gtfs,region_config,elevators",
+    "build": "npm run gtfs-process",
+    "start": "node src/index.js",
     "gtfs-process": "NODE_ENV=development node ./gtfs-processor/src/generate-gtfs-derived-assets.js",
     "test": "npm t"
   },
@@ -18,6 +17,8 @@
     "node": ">=22"
   },
   "dependencies": {
+    "@bikehopper/data-mirror": "^4.4.0",
+    "@bikehopper/node-tippecanoe": "^0.1.0",
     "@keyv/redis": "^2.8.4",
     "@turf/buffer": "^7.2.0",
     "@turf/convex": "^7.2.0",
