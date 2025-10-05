@@ -1,3 +1,0 @@
-[submodule "submodule-deps/tippecanoe"]
-	path = gtfs-processor/submodule-deps/tippecanoe
-	url = https://github.com/felt/tippecanoe.git
