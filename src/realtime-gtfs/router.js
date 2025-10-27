@@ -169,9 +169,8 @@ async function vehiclePositionsCb (req, res) {
   res.header('Age', vehiclePosition.age);
   switch(req.accepts(['application/x-protobuf', 'application/json'])) {
     case 'application/x-protobuf':
-      const encodedProtoBuf = GtfsRealtimeBindings.transit_realtime.FeedMessage.encode(vehiclePositionsFiltered).finish();
       res.header('Content-Type', 'application/x-protobuf');
-      res.send(encodedProtoBuf);
+      res.send(GtfsRealtimeBindings.transit_realtime.FeedMessage.encode(vehiclePositionsFiltered).finish());
       break;
     case 'application/json':
       res.json(vehiclePositionsFiltered);
@@ -240,9 +239,8 @@ async function tripUpdatesCb (req, res) {
   res.header('Age', tripUpdates.age);
   switch(req.accepts(['application/x-protobuf', 'application/json'])) {
     case 'application/x-protobuf':
-      const encodedProtoBuf = GtfsRealtimeBindings.transit_realtime.FeedMessage.encode(tripUpdatesFiltered).finish();
       res.header('Content-Type', 'application/x-protobuf');
-      res.send(encodedProtoBuf);
+      res.send(GtfsRealtimeBindings.transit_realtime.FeedMessage.encode(tripUpdatesFiltered).finish());
       break;
     case 'application/json':
       res.json(tripUpdatesFiltered);

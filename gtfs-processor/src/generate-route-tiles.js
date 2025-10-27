@@ -180,10 +180,6 @@ export default async function generateRouteTiles(
   if (existsSync(stopTilesPath)) {
     await rm(stopTilesPath, {recursive: true});
   }
-  try {
-    await runTippecanoe(routeLinesLDGeoJsonPath, routeTilesPath, 'route-lines', 7, true, false);
-    await runTippecanoe(stopLDGeoJsonPath, stopTilesPath, 'stops', 8, false, true);
-  } catch (e) {
-    throw e;
-  }
+  await runTippecanoe(routeLinesLDGeoJsonPath, routeTilesPath, 'route-lines', 7, true, false);
+  await runTippecanoe(stopLDGeoJsonPath, stopTilesPath, 'stops', 8, false, true);
 }

@@ -1,6 +1,4 @@
-import { mkdtemp } from 'node:fs/promises';
-import { resolve, join } from 'node:path';
-import { tmpdir } from 'node:os';
+import { resolve } from 'node:path';
 import { mkdir, writeFile, stat } from 'node:fs/promises';
 import { closeDb, importGtfs, openDb } from 'gtfs';
 
@@ -28,8 +26,6 @@ import { existsSync } from 'node:fs';
  *  4. route-tiles and stop-tiles: Map tiles for displaying route and stop
  *     information.
  */
-
-const requiredGTFSFiles = new Set(['routes.txt', 'trips.txt', 'stop_times.txt', 'stops.txt', 'shapes.txt']);
 
 // Initialize temprary folders to hold gtfs files
 const gtfsFilePath = resolve('data/gtfs.zip');

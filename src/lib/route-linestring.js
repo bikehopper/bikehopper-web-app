@@ -17,6 +17,7 @@ export async function loadLookupTables() {
   } catch (err) {
     logger.warn('Error occured when attempting to load routlines lookup tables into memory.');
     logger.warn('High res routlines will not be generated');
+    logger.warn(err);
   }
 }
 

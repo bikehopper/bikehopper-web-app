@@ -1,6 +1,5 @@
 import express from 'express';
 import photonClient from './client.js';
-import logger from '../lib/logger.js';
 
 const router = express.Router();
 

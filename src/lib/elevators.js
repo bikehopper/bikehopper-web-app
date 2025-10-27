@@ -29,7 +29,7 @@ function _getElevatorInfo() {
 }
 
 export function mergeElevatorInfoIntoRoutes(routeResult) {
-  const elevators = _getElevatorInfo();
+  _getElevatorInfo();
   if (!routeResult || !routeResult.paths || !_elevatorInfo) return routeResult;
 
   for (const path of routeResult.paths) {

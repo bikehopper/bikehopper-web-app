@@ -12,7 +12,6 @@ let _alertsCacheTime;
 let _alertsPromise;
 
 export async function getAlerts() {
-  let alerts;
   if (_alertsCache && Date.now() - _alertsCacheTime < ALERTS_CACHE_TIME_MSEC) {
     return _alertsCache;
   }

@@ -109,7 +109,7 @@ async function initApp() {
 
   // Add headers so mapliber-gl decodes protobufs appropriately
   const staticTilesOpts = { 
-    setHeaders: (res, _u1, _u2) => {
+    setHeaders: (res) => {
       res.setHeader('Content-Encoding', 'gzip');
       res.setHeader('Content-Type', 'application/x-protobuf');
     },
