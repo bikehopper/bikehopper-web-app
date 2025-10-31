@@ -15,7 +15,8 @@
   "author": "BikeHopper team",
   "license": "AGPL-3.0-or-later",
   "engines": {
-    "node": ">=22"
+    "node": ">=22.20",
+    "npm": ">=11.6"
   },
   "dependencies": {
     "@bikehopper/data-mirror": "^4.4.0",
