@@ -1,5 +1,38 @@
-import fs from 'fs';
 import { isEmpty } from 'ramda';
+import * as dotenv from 'dotenv';
+import * as dotenvExpand from 'dotenv-expand';
+import fs from 'node:fs';
+
+// Load .env files in a similar way to the bikehopper-ui frontend
+// .env.development.local, .env.development, .env, etc
+//
+// We should probably only use this for development and rely on Docker
+// supplying the env vars in production
+
+const NODE_ENV = process.env.NODE_ENV || 'development';
+const dotenvPath = '.env';
+
+// https://github.com/bkeepers/dotenv#what-other-env-files-can-i-use
+const dotenvFiles = [
+  `${dotenvPath}.${NODE_ENV}.local`,
+  // Don't include `.env.local` for `test` environment
+  // since normally you expect tests to produce the same
+  // results for everyone
+  NODE_ENV !== 'test' && `${dotenvPath}.local`,
+  `${dotenvPath}.${NODE_ENV}`,
+  dotenvPath,
+].filter(Boolean);
+
+// Load environment variables from .env* files. Suppress warnings using silent
+// if this file is missing. dotenv will never modify any environment variables
+// that have already been set.  Variable expansion is supported in .env files.
+// https://github.com/motdotla/dotenv
+// https://github.com/motdotla/dotenv-expand
+for (const dotenvFile of dotenvFiles) {
+  if (fs.existsSync(dotenvFile)) {
+    dotenvExpand.expand(dotenv.config({path: dotenvFile}));
+  }
+}
 
 export const PORT = Number(process.env.PORT) || 3002;
 export const GRAPHHOPPER_SERVICE_NAME = process.env.GRAPHHOPPER_SERVICE_NAME;
@@ -11,11 +44,6 @@ export const GTFS_REALTIME_TOKEN = isEmpty(process.env.GTFS_REALTIME_TOKEN) ? nu
 export const GTFS_REALTIME_VEHICLE_POSITION_TOKEN = isEmpty(process.env.GTFS_REALTIME_VEHICLE_POSITION_TOKEN) ? null : process.env.GTFS_REALTIME_VEHICLE_POSITION_TOKEN;
 export const GTFS_REALTIME_TRIP_UPDATES_TOKEN = isEmpty(process.env.GTFS_REALTIME_TRIP_UPDATES_TOKEN) ? null : process.env.GTFS_REALTIME_TRIP_UPDATES_TOKEN;
 export const GTFS_REALTIME_SERVICE_ALERTS_TOKEN = isEmpty(process.env.GTFS_REALTIME_SERVICE_ALERTS_TOKEN) ? null : process.env.GTFS_REALTIME_SERVICE_ALERTS_TOKEN;
-
-export const GTFS_REALTIME_ALERTS_URL = regionConfig.gtfsRtUrls?.alerts;
-export const GTFS_REALTIME_VEHICLE_POSITIONS_URL =
-  regionConfig.gtfsRtUrls?.vehiclePositions;
-export const GTFS_REALTIME_TRIP_UPDATES_URL = regionConfig.gtfsRtUrls?.tripUpdates;
 
 // 511.org allows us 60 requests per hour, let's be conservative and
 // cache for 3min to make it a maximum of 20.
