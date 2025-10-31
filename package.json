@@ -19,7 +19,7 @@
   },
   "dependencies": {
     "@bikehopper/data-mirror": "^4.4.0",
-    "@bikehopper/node-tippecanoe": "bikehopper/node-tippecanoe#0.2.0",
+    "@bikehopper/node-tippecanoe": "git+https://github.com/bikehopper/node-tippecanoe.git#v0.3.0",
     "@keyv/redis": "^2.8.4",
     "@turf/buffer": "^7.2.0",
     "@turf/convex": "^7.2.0",
