@@ -5,26 +5,31 @@ Lightweight Node.js proxy for BikeHopper backends. See
 
 ## How to setup
 
-Install these prerequisites:
+Prerequisites:
+- Linux/debian_x64 environment (WSL Ubuntu works)
 - npm and Node 22+ (for example, using [nvm](https://github.com/nvm-sh/nvm#installing-and-updating)),
 
 Then:
 - `git clone` this repo
-- `git submodule init` to get tippecanoe
-- `npm install`
-- Copy `.env.template` to `env.development.local` and add appropriate values for local development
-- Copy `region-config-example.json` and modify it for your region
-- Put a GTFS feed dump in place
+- `npm install` 
+    - This will also install data dependencies like gtfs.zip
+- `npm run build`
+    - This will build artifacts from the data dependencies
+- Setup Environment variables:
+    - A maajor role of this service is to proxy requests from teh frontend to other services.
+    - The URL's for these other services are setup via env vars
+    - See `src/config.js` for more details
+- `npm run start` To start  the server
 
-## How to use
-
-To process the GTFS feed, run `npm run gtfs-process`.
-
-Then run `npm run start-nodocker` to start the app. The Node server will start printing logs to the console.
-
-In another terminal, `curl localhost:3001/health` to ensure the server is performing correctly.
-
-The routing api is available at `curl localhost:3001/v1/graphhopper/<route>`.
+# node-tippecanoe wonkiness
+- We rely on a pre-compiled version of [tippecanoe](https://github.com/felt/tippecanoe) stored in the [node-tippecanoe](https://github.com/bikehopper/node-tippecanoe) repo.
+- This is wired up as a `git` dependency in `package.json`
+    - NPM's caching of git dependencies is too aggresive, so manually clearing and re-adding the dependency is needed.
+    - Ensure the git tag, and the `package.json.version` are bumped in the `node-tippecanoe` repo
+    - Delete the `@bikehopper/node-tippecanoe` in this repo's `package.json`
+        - Run `npm install`
+    - Re-add the `@bikehopper/node-tippecanoe` in this repo's `package.json` with the updated `#<version` at the end
+        - Run `npm install`
 
 ## Routes
 
