@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
-import { GEO_CONFIG_FOLDER_PATH } from '../config.js';
+import { GEO_CONFIG_FOLDER_PATH } from '../consts.js';
 import logger from './logger.js';
 import { getParentStationStopId } from './gtfs-db.js';
 
@@ -29,7 +29,7 @@ function _getElevatorInfo() {
 }
 
 export function mergeElevatorInfoIntoRoutes(routeResult) {
-  const elevators = _getElevatorInfo();
+  _getElevatorInfo();
   if (!routeResult || !routeResult.paths || !_elevatorInfo) return routeResult;
 
   for (const path of routeResult.paths) {

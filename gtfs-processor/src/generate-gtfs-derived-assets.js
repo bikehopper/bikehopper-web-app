@@ -1,6 +1,4 @@
-import { mkdtemp } from 'node:fs/promises';
-import { resolve, join } from 'node:path';
-import { tmpdir } from 'node:os';
+import { resolve } from 'node:path';
 import { mkdir, writeFile, stat } from 'node:fs/promises';
 import { closeDb, importGtfs, openDb } from 'gtfs';
 
@@ -12,10 +10,8 @@ import processElevatorInfo from './process-elevator-info.js';
 import {
   FILTERED_AGENCY_IDS as ENV_FILTERED_AGENCY_IDS,
   MANUALLY_FILTERED_ROUTE_IDS as ENV_MANUALLY_FILTERED_ROUTE_IDS,
-  GTFS_ZIP_PATH,
-  ELEVATOR_INFO_PATH,
-  GEO_CONFIG_FOLDER_PATH,
 } from '../../src/config.js';
+import { existsSync } from 'node:fs';
 
 /*
  * This script generates several assets from the GTFS zip file.
@@ -31,12 +27,10 @@ import {
  *     information.
  */
 
-const requiredGTFSFiles = new Set(['routes.txt', 'trips.txt', 'stop_times.txt', 'stops.txt', 'shapes.txt']);
-
 // Initialize temprary folders to hold gtfs files
-const gtfsFilePath = resolve(GTFS_ZIP_PATH);
-const elevatorInfoPath = ELEVATOR_INFO_PATH && resolve(ELEVATOR_INFO_PATH);
-const outputPath = resolve(GEO_CONFIG_FOLDER_PATH);
+const gtfsFilePath = resolve('data/gtfs.zip');
+const elevatorInfoPath = resolve('data/elevators.csv');
+const outputPath = resolve('config/geoconfigs');
 await mkdir(outputPath, { recursive: true });
 const sqlitePath = resolve(outputPath, 'gtfs.db');
 
@@ -85,7 +79,7 @@ await generateLocalTransitBounds(
 console.log(`Finished writing transit-service-area.json to: ${outputPath}`)
 
 // Generate elevators.json
-if (elevatorInfoPath) {
+if (existsSync(elevatorInfoPath)) {
   console.log(`Processing elevator info from ${elevatorInfoPath}`);
   const elevatorInfo = processElevatorInfo(elevatorInfoPath, outputPath);
   const elevOutputPath = resolve(outputPath, 'elevators.json');

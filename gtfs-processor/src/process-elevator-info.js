@@ -2,9 +2,8 @@ import { readFileSync } from 'node:fs';
 import { parse } from 'csv-parse/sync';
 import { getAgencies, getRoutes, getStops } from 'gtfs';
 import groupBy from 'lodash/groupBy.js';
-import omit from 'lodash/omit.js';
 
-export default function processElevatorInfo(elevatorInfoPath, outputPath) {
+export default function processElevatorInfo(elevatorInfoPath) {
   const elevators = parse(readFileSync(elevatorInfoPath, 'utf8'), { columns: true });
 
   // Does each elevator row have a valid agency string?

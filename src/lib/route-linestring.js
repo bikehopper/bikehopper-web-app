@@ -4,7 +4,7 @@ import logger from './logger.js';
 
 import { lineSlice } from '@turf/line-slice';
 import { lineString, point } from '@turf/helpers';
-import { GEO_CONFIG_FOLDER_PATH } from '../config.js';
+import { GEO_CONFIG_FOLDER_PATH } from '../consts.js';
 
 let lookupTables = null;
 
@@ -17,6 +17,7 @@ export async function loadLookupTables() {
   } catch (err) {
     logger.warn('Error occured when attempting to load routlines lookup tables into memory.');
     logger.warn('High res routlines will not be generated');
+    logger.warn(err);
   }
 }
 

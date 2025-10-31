@@ -9,5 +9,5 @@ node_modules
 
 config
 gtfs
-input
+data
 geojson

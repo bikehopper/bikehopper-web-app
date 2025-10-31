@@ -5,7 +5,8 @@ import pinoHttp from 'pino-http';
 import { satisfies } from 'compare-versions';
 
 import logger from './lib/logger.js';
-import { GEO_CONFIG_FOLDER_PATH, PORT as port } from './config.js';
+import { PORT as port } from './config.js';
+import { GEO_CONFIG_FOLDER_PATH } from './consts.js';
 
 import { router as graphHopperRouter } from './graphhopper/index.js';
 import { router as photonRouter } from './photon/index.js';
@@ -109,7 +110,7 @@ async function initApp() {
 
   // Add headers so mapliber-gl decodes protobufs appropriately
   const staticTilesOpts = { 
-    setHeaders: (res, _u1, _u2) => {
+    setHeaders: (res) => {
       res.setHeader('Content-Encoding', 'gzip');
       res.setHeader('Content-Type', 'application/x-protobuf');
     },

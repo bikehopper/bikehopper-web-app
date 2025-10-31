@@ -4,7 +4,7 @@ import { join } from 'path';
 import { lineString, point } from '@turf/helpers';
 import { getRoutes, getStops } from 'gtfs';
 
-import { runTippecanoe } from './tippecanoe-helper.js';
+import runTippecanoe  from '@bikehopper/node-tippecanoe';
 
 
 /**
@@ -180,10 +180,6 @@ export default async function generateRouteTiles(
   if (existsSync(stopTilesPath)) {
     await rm(stopTilesPath, {recursive: true});
   }
-  try {
-    await runTippecanoe(routeLinesLDGeoJsonPath, routeTilesPath, 'route-lines', 7, true, false);
-    await runTippecanoe(stopLDGeoJsonPath, stopTilesPath, 'stops', 8, false, true);
-  } catch (e) {
-    throw e;
-  }
+  await runTippecanoe(routeLinesLDGeoJsonPath, routeTilesPath, 'route-lines', 7, true, false);
+  await runTippecanoe(stopLDGeoJsonPath, stopTilesPath, 'stops', 8, false, true);
 }

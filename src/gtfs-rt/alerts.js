@@ -1,5 +1,4 @@
 import { DateTime } from 'luxon';
-import logger from '../lib/logger.js';
 
 // Merges relevant GTFS service alerts into a GraphHopper response.
 // Mutates the routeResult param.
@@ -69,7 +68,7 @@ function _doesAlertApplyToLeg(alert, leg) {
     // than null/undefined, despite the fact that route type 0 has a very different meaning
     // (no route type means the alert affects all route types; route type 0 means the
     // alert only affects trams). We have to work around this by using hasOwnProperty.
-    if (entity.hasOwnProperty('routeType') && entity.route_type !== entity.routeType)
+    if (entity.hasOwn('routeType') && entity.route_type !== entity.routeType)
       continue;
 
     // TODO: Support filtering out alerts with no trip_id, but a trip descriptor
@@ -89,7 +88,7 @@ function _serializeAlert(alert) {
       trip_id: entity.trip?.tripId || null,
       // As noted above, we must check if the routeType property is actually present
       // or else evaluating a missing value will result in 0, which means tram.
-      route_type: entity.hasOwnProperty('routeType') ? entity.routeType : null,
+      route_type: entity.hasOwn('routeType') ? entity.routeType : null,
       route_id: entity.routeId,
       agency_id: entity.agencyId,
     })),
