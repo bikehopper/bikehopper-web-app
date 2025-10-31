@@ -5,7 +5,8 @@ import pinoHttp from 'pino-http';
 import { satisfies } from 'compare-versions';
 
 import logger from './lib/logger.js';
-import { GEO_CONFIG_FOLDER_PATH, PORT as port } from './config.js';
+import { PORT as port } from './config.js';
+import { GEO_CONFIG_FOLDER_PATH } from './consts.js';
 
 import { router as graphHopperRouter } from './graphhopper/index.js';
 import { router as photonRouter } from './photon/index.js';

@@ -1,7 +1,7 @@
 import { join } from 'node:path';
 import { getStops, openDb } from 'gtfs';
 
-import { GEO_CONFIG_FOLDER_PATH } from '../config.js';
+import { GEO_CONFIG_FOLDER_PATH } from '../consts.js';
 
 let _db;
 

@@ -4,9 +4,11 @@ import { readFile } from 'node:fs/promises';
 import {
   MAPBOX_ACCESS_TOKEN,
   MAPBOX_STYLE_URL,
-  REGION_CONFIG,
-  GEO_CONFIG_FOLDER_PATH,
 } from '../config.js';
+import {
+  GEO_CONFIG_FOLDER_PATH,
+  REGION_CONFIG,
+} from '../consts.js';
 
 const router = express.Router();
 let transitServiceAreaCache = null;

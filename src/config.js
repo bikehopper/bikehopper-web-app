@@ -3,21 +3,14 @@ import { isEmpty } from 'ramda';
 
 export const PORT = Number(process.env.PORT) || 3002;
 export const GRAPHHOPPER_SERVICE_NAME = process.env.GRAPHHOPPER_SERVICE_NAME;
-export const NAMESPACE = process.env.NAMESPACE;
-export const HOSTNAME = process.env.HOSTNAME;
 export const PHOTON_SERVICE_NAME = process.env.PHOTON_SERVICE_NAME;
 export const NOMINATIM_SERVICE_NAME = process.env.NOMINATIM_SERVICE_NAME;
-export const GEO_CONFIG_FOLDER_PATH = 'config/geoconfigs';
 export const CACHE_CONN_STRING = isEmpty(process.env.CACHE_CONN_STRING) ? undefined : process.env.CACHE_CONN_STRING;
 
 export const GTFS_REALTIME_TOKEN = isEmpty(process.env.GTFS_REALTIME_TOKEN) ? null : process.env.GTFS_REALTIME_TOKEN;
 export const GTFS_REALTIME_VEHICLE_POSITION_TOKEN = isEmpty(process.env.GTFS_REALTIME_VEHICLE_POSITION_TOKEN) ? null : process.env.GTFS_REALTIME_VEHICLE_POSITION_TOKEN;
 export const GTFS_REALTIME_TRIP_UPDATES_TOKEN = isEmpty(process.env.GTFS_REALTIME_TRIP_UPDATES_TOKEN) ? null : process.env.GTFS_REALTIME_TRIP_UPDATES_TOKEN;
 export const GTFS_REALTIME_SERVICE_ALERTS_TOKEN = isEmpty(process.env.GTFS_REALTIME_SERVICE_ALERTS_TOKEN) ? null : process.env.GTFS_REALTIME_SERVICE_ALERTS_TOKEN;
-
-const regionConfig = JSON.parse(fs.readFileSync('data/region-config.json', 'utf8'));
-
-export const REGION_CONFIG = regionConfig;
 
 export const GTFS_REALTIME_ALERTS_URL = regionConfig.gtfsRtUrls?.alerts;
 export const GTFS_REALTIME_VEHICLE_POSITIONS_URL =

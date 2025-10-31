@@ -1,12 +1,10 @@
 import axios from 'axios';
 import {
   NOMINATIM_SERVICE_NAME,
-  HOSTNAME,
-  NAMESPACE
 } from '../config.js';
 
 const client = axios.create({
-  baseURL: `http://${NOMINATIM_SERVICE_NAME}.${NAMESPACE}.${HOSTNAME}/`,
+  baseURL: `http://${NOMINATIM_SERVICE_NAME}/`,
   timeout: 2000
 });
 
