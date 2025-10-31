@@ -1,12 +1,12 @@
 import GtfsRealtimeBindings from 'gtfs-realtime-bindings';
 import logger from '../lib/logger.js';
 import {
-  GTFS_REALTIME_TOKEN,
-  GTFS_REALTIME_SERVICE_ALERTS_TOKEN,
   GTFS_REALTIME_ALERTS_URL,
 } from '../consts.js'
 import {
+  GTFS_REALTIME_SERVICE_ALERTS_TOKEN,
   ALERTS_CACHE_TIME_MSEC,
+  GTFS_REALTIME_TOKEN
 } from '../config.js';
 
 let _alertsCache;

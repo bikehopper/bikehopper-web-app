@@ -6,7 +6,7 @@ import logger from '../lib/logger.js';
 import {
   GTFS_REALTIME_VEHICLE_POSITIONS_URL,
   GTFS_REALTIME_TRIP_UPDATES_URL,
-} from '../config.js';
+} from '../consts.js';
 import GtfsRealtimeBindings from 'gtfs-realtime-bindings';
 
 const vehiclePositionsUrl = GTFS_REALTIME_VEHICLE_POSITIONS_URL;
