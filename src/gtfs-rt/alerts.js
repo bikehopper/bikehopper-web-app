@@ -67,7 +67,7 @@ function _doesAlertApplyToLeg(alert, leg) {
     // but if no routeType is provided in the data, entity.routeType evaluates to 0, rather
     // than null/undefined, despite the fact that route type 0 has a very different meaning
     // (no route type means the alert affects all route types; route type 0 means the
-    // alert only affects trams). We have to work around this by using hasOwnProperty.
+    // alert only affects trams). We have to work around this by using hasOwn.
     if (Object.hasOwn(entity, 'routeType') && entity.route_type !== entity.routeType)
       continue;
 
