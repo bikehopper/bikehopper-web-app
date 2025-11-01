@@ -34,7 +34,7 @@ for (const dotenvFile of dotenvFiles) {
   }
 }
 
-export const PORT = Number(process.env.PORT) || 3002;
+export const PORT = Number(process.env.PORT) || 3001;
 export const GRAPHHOPPER_SERVICE_NAME = process.env.GRAPHHOPPER_SERVICE_NAME;
 export const PHOTON_SERVICE_NAME = process.env.PHOTON_SERVICE_NAME;
 export const NOMINATIM_SERVICE_NAME = process.env.NOMINATIM_SERVICE_NAME;
