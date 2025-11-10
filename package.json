@@ -42,8 +42,7 @@
     "luxon": "^3.2.1",
     "pino": "^10.1.0",
     "pino-http": "^11.0.0",
-    "pino-http-print": "^4.0.0",
-    "ramda": "^0.29.1"
+    "pino-http-print": "^4.0.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.38.0",
