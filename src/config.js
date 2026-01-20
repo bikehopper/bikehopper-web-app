@@ -39,14 +39,7 @@ export const PHOTON_SERVICE_NAME = process.env.PHOTON_SERVICE_NAME;
 export const NOMINATIM_SERVICE_NAME = process.env.NOMINATIM_SERVICE_NAME;
 export const CACHE_CONN_STRING = process.env.CACHE_CONN_STRING || undefined;
 
-export const GTFS_REALTIME_TOKEN = process.env.GTFS_REALTIME_TOKEN || null;
-export const GTFS_REALTIME_VEHICLE_POSITION_TOKEN = process.env.GTFS_REALTIME_VEHICLE_POSITION_TOKEN || null;
-export const GTFS_REALTIME_TRIP_UPDATES_TOKEN = process.env.GTFS_REALTIME_TRIP_UPDATES_TOKEN || null;
-export const GTFS_REALTIME_SERVICE_ALERTS_TOKEN = process.env.GTFS_REALTIME_SERVICE_ALERTS_TOKEN || null;
-
-// 511.org allows us 60 requests per hour, let's be conservative and
-// cache for 3min to make it a maximum of 20.
-const DEFAULT_ALERTS_CACHE_TIME_MSEC = 3 * 60 * 1000;
+const DEFAULT_ALERTS_CACHE_TIME_MSEC = 0.5 * 60 * 1000; // half-minute update interval
 export const ALERTS_CACHE_TIME_MSEC = (
   process.env.ALERTS_CACHE_TIME_MSEC || DEFAULT_ALERTS_CACHE_TIME_MSEC
 );
