@@ -35,7 +35,6 @@ router.get('/', async (req, res) => {
   if (transitServiceArea) {
     config.transitServiceArea = transitServiceArea;
   }
-  delete config.gtfsRtUrls; // Not used in frontend (can't be, would expose token)
 
   if (MAPBOX_ACCESS_TOKEN != null) {
     config.mapboxAccessToken = MAPBOX_ACCESS_TOKEN;
