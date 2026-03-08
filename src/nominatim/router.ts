@@ -11,8 +11,8 @@ router.get('/search', async (req, res) => {
     });
     res.json(resp.data);
   } catch (error) {
-    if (error.response) {
-      res.sendStatus(error.response.status);
+    if ((error as any).response) {
+      res.sendStatus((error as any).response.status);
     }
     else {
       res.sendStatus(500);
@@ -30,8 +30,8 @@ router.get('/reverse', async (req, res) => {
     });
     res.json(resp.data);
   } catch (error) {
-    if (error.response) {
-      res.sendStatus(error.response.status);
+    if ((error as any).response) {
+      res.sendStatus((error as any).response.status);
     }
     else {
       res.sendStatus(500);
@@ -49,8 +49,8 @@ router.get('/lookup', async (req, res) => {
     });
     res.json(resp.data);
   } catch (error) {
-    if (error.response) {
-      res.sendStatus(error.response.status);
+    if ((error as any).response) {
+      res.sendStatus((error as any).response.status);
     }
     else {
       res.sendStatus(500);
@@ -68,8 +68,8 @@ router.get('/details', async (req, res) => {
     });
     res.json(resp.data);
   } catch (error) {
-    if (error.response) {
-      res.sendStatus(error.response.status);
+    if ((error as any).response) {
+      res.sendStatus((error as any).response.status);
     }
     else {
       res.sendStatus(500);
@@ -87,8 +87,8 @@ router.get('/status', async (req, res) => {
     });
     res.json(resp.data);
   } catch (error) {
-    if (error.response) {
-      res.sendStatus(error.response.status);
+    if ((error as any).response) {
+      res.sendStatus((error as any).response.status);
     }
     else {
       res.sendStatus(500);

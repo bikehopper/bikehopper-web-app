@@ -11,3 +11,4 @@ config
 gtfs
 data
 geojson
+dist

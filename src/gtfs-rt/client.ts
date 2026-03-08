@@ -7,9 +7,11 @@ import {
   ALERTS_CACHE_TIME_MSEC,
 } from '../config.js';
 
-let _alertsCache;
-let _alertsCacheTime;
-let _alertsPromise;
+export type GtfsRealtimeAlert = GtfsRealtimeBindings.transit_realtime.IAlert;
+
+let _alertsCache: GtfsRealtimeAlert[] | null;
+let _alertsCacheTime = 0;;
+let _alertsPromise: Promise<GtfsRealtimeAlert[]> | null;
 
 export async function getAlerts() {
   if (_alertsCache && Date.now() - _alertsCacheTime < ALERTS_CACHE_TIME_MSEC) {
@@ -38,13 +40,13 @@ export async function getAlerts() {
   }
 }
 
-async function _getAlertsNoCache() {
+async function _getAlertsNoCache(): Promise<GtfsRealtimeAlert[]> {
   const url = new URL(GTFS_REALTIME_ALERTS_URL);
   const response = await fetch(url);
 
   if (!response.ok) {
     const err = new Error(`${response.url}: ${response.status} ${response.statusText}`);
-    err.response = response;
+    (err as any).response = response;
     logger.error(err);
     throw err;
   }
@@ -52,7 +54,13 @@ async function _getAlertsNoCache() {
   const alertFeed = GtfsRealtimeBindings.transit_realtime.FeedMessage.decode(
     new Uint8Array(buf)
   );
-  const alerts = alertFeed.entity.filter(ent => ent.alert).map(ent => ent.alert);
+
+  const alerts: GtfsRealtimeAlert[] = [];
+  for (const {alert} of alertFeed.entity) {
+    if (alert != null) {
+      alerts.push(alert);
+    }
+  }
 
   return alerts;
 }
