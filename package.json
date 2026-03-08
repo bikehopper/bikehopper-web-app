@@ -42,10 +42,12 @@
     "luxon": "^3.2.1",
     "pino": "^10.1.0",
     "pino-http": "^11.0.0",
-    "pino-http-print": "^4.0.0"
+    "pino-http-print": "^4.0.0",
+    "zod": "^4.3.6"
   },
   "devDependencies": {
     "@eslint/js": "^9.38.0",
+    "@types/better-sqlite3": "^7.6.13",
     "eslint": "^9.38.0",
     "globals": "^16.4.0",
     "nodemon": "^3.1.0"

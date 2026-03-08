@@ -4,8 +4,9 @@ import { join } from 'node:path';
 import { GEO_CONFIG_FOLDER_PATH } from '../consts.js';
 import logger from './logger.js';
 import { getParentStationStopId } from './gtfs-db.js';
+import { ElevatorsJsonParser, type ElevatorsJson } from './elevator-types.js';
 
-let _elevatorInfo;
+let _elevatorInfo: ElevatorsJson | null;
 
 function _getElevatorInfo() {
   if (_elevatorInfo === undefined) {
@@ -14,10 +15,10 @@ function _getElevatorInfo() {
         GEO_CONFIG_FOLDER_PATH,
         'elevators.json'
       );
-      _elevatorInfo = JSON.parse(readFileSync(elevInfoPath, 'utf8'));
+      _elevatorInfo = ElevatorsJsonParser.parse(JSON.parse(readFileSync(elevInfoPath, 'utf8')));
       logger.info('elevator info loaded');
     } catch (e) {
-      if (e?.code === 'ENOENT') {
+      if ((e as any)?.code === 'ENOENT') {
         logger.warn('no elevator info');
         _elevatorInfo = null; // Elevator info not provided
       } else {

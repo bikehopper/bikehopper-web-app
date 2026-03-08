@@ -4,16 +4,16 @@ import bodyParser from 'body-parser';
 import pinoHttp from 'pino-http';
 import { satisfies } from 'compare-versions';
 
-import logger from './lib/logger.js';
-import { PORT as port } from './config.js';
-import { GEO_CONFIG_FOLDER_PATH } from './consts.js';
+import logger from './src/lib/logger.js';
+import { PORT as port } from './src/config.js';
+import { GEO_CONFIG_FOLDER_PATH } from './src/consts.js';
 
-import { router as graphHopperRouter } from './graphhopper/index.js';
-import { router as photonRouter } from './photon/index.js';
-import { router as nominatimRouter } from './nominatim/index.js';
-import { router as geoConfigRouter } from './geoconfig/index.js';
-import { router as realtimeRouter } from './realtime-gtfs/index.js';
-import { loadLookupTables } from './lib/route-linestring.js';
+import { router as graphHopperRouter } from './src/graphhopper/index.js';
+import { router as photonRouter } from './src/photon/index.js';
+import { router as nominatimRouter } from './src/nominatim/index.js';
+import { router as geoConfigRouter } from './src/geoconfig/index.js';
+import { router as realtimeRouter } from './src/realtime-gtfs/index.js';
+import { loadLookupTables } from './src/lib/route-linestring.js';
 import path from 'path';
 
 
@@ -39,7 +39,7 @@ async function initApp() {
   app.use(helmet({ crossOriginResourcePolicy: { policy: 'same-site' } }));
   
   // used by k8s for health checks
-  app.get('/health', (req, res) => {
+  app.get('/health', (_, res) => {
     res.sendStatus(200);
     res.end();
   });
@@ -54,14 +54,14 @@ async function initApp() {
   await loadLookupTables();
   
   app.use((req, res, next) => {
-    if (process.env.NODE_ENV === 'development') {
+    if (process.env['NODE_ENV'] === 'development') {
       res.set('access-control-allow-headers', '*');
       res.set('access-control-allow-origin', '*');
       res.set('access-control-allow-methods', '*');
     }
 
-    if (process.env.ALLOW_ORIGIN) {
-      res.set('access-control-allow-origin', process.env.ALLOW_ORIGIN);
+    if (process.env['ALLOW_ORIGIN']) {
+      res.set('access-control-allow-origin', process.env['ALLOW_ORIGIN']);
     }
     const accessControlRequestHeaders = req.get('access-control-request-headers');
     if (accessControlRequestHeaders) {

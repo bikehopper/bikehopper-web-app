@@ -9,9 +9,10 @@ import {
   GEO_CONFIG_FOLDER_PATH,
   REGION_CONFIG,
 } from '../consts.js';
+import { TransitServiceAreaParser, type TransitServiceArea, type FullRegionConfig } from './types.js';
 
 const router = express.Router();
-let transitServiceAreaCache = null;
+let transitServiceAreaCache: TransitServiceArea | null = null;
 
 router.get('/', async (req, res) => {
   let transitServiceArea = transitServiceAreaCache;
@@ -21,9 +22,9 @@ router.get('/', async (req, res) => {
         GEO_CONFIG_FOLDER_PATH,
         'transit-service-area.json',
       ), { encoding: 'utf8' });
-      transitServiceArea = JSON.parse(fileContents);
+      transitServiceArea = TransitServiceAreaParser.parse(JSON.parse(fileContents));
 
-      if (process.env.NODE_ENV !== 'development') {
+      if (process.env['NODE_ENV'] !== 'development') {
         transitServiceAreaCache = transitServiceArea;
       }
     } catch (err) {
@@ -31,7 +32,7 @@ router.get('/', async (req, res) => {
     }
   }
 
-  const config = {...REGION_CONFIG};
+  const config: FullRegionConfig = {...REGION_CONFIG};
   if (transitServiceArea) {
     config.transitServiceArea = transitServiceArea;
   }

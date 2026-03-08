@@ -3,9 +3,11 @@ import { getStops, openDb } from 'gtfs';
 
 import { GEO_CONFIG_FOLDER_PATH } from '../consts.js';
 
-let _db;
+import type {Database} from 'better-sqlite3';
 
-export function ensureGtfsDb() {
+let _db: Database | null;
+
+export function ensureGtfsDb(): Database | null {
   if (_db === undefined) {
     _db = openDb({
       sqlitePath: join(GEO_CONFIG_FOLDER_PATH, 'gtfs.db'),
@@ -16,8 +18,11 @@ export function ensureGtfsDb() {
 
 // Get the stop's parent station ID, if it has one; if not, the input stop ID is
 // returned.
-export function getParentStationStopId(stopId) {
+export function getParentStationStopId(stopId: string): string {
   const db = ensureGtfsDb();
+
+  if (!db) return stopId;
+
   let stopInfo = getStops(
     { stop_id: stopId, },
     ['parent_station'],
@@ -26,5 +31,6 @@ export function getParentStationStopId(stopId) {
   )[0];
 
   if (!stopInfo || stopInfo.parent_station == null) return stopId;
+  
   return stopInfo.parent_station;
 }
