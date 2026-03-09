@@ -1,19 +1,18 @@
 import express from 'express';
 import helmet from 'helmet';
 import bodyParser from 'body-parser';
-import pinoHttp from 'pino-http';
+import { pinoHttp } from 'pino-http';
 import { satisfies } from 'compare-versions';
 
-import logger from './src/lib/logger.js';
-import { PORT as port } from './src/config.js';
-import { GEO_CONFIG_FOLDER_PATH } from './src/consts.js';
+import logger from './lib/logger.js';
+import { PORT as port } from './config.js';
+import { GEO_CONFIG_FOLDER_PATH } from './consts.js';
 
-import { router as graphHopperRouter } from './src/graphhopper/index.js';
-import { router as photonRouter } from './src/photon/index.js';
-import { router as nominatimRouter } from './src/nominatim/index.js';
-import { router as geoConfigRouter } from './src/geoconfig/index.js';
-import { router as realtimeRouter } from './src/realtime-gtfs/index.js';
-import { loadLookupTables } from './src/lib/route-linestring.js';
+import { router as graphHopperRouter } from './graphhopper/index.js';
+import { router as photonRouter } from './photon/index.js';
+import { router as nominatimRouter } from './nominatim/index.js';
+import { router as geoConfigRouter } from './geoconfig/index.js';
+import { loadLookupTables } from './lib/route-linestring.js';
 import path from 'path';
 
 
@@ -82,9 +81,6 @@ async function initApp() {
   app.use('/v1/config', geoConfigRouter);
   app.use('/api/v1/config', geoConfigRouter);
   
-  app.use('/v1/realtime', realtimeRouter);
-  app.use('/api/v1/realtime', realtimeRouter);
-  
   // generic API path so we don't have a leaky abstraction
   app.use('/v1/route', graphHopperRouter);
   app.use('/api/v1/route', graphHopperRouter);
@@ -110,7 +106,7 @@ async function initApp() {
 
   // Add headers so mapliber-gl decodes protobufs appropriately
   const staticTilesOpts = { 
-    setHeaders: (res) => {
+    setHeaders: (res: any) => {
       res.setHeader('Content-Encoding', 'gzip');
       res.setHeader('Content-Type', 'application/x-protobuf');
     },

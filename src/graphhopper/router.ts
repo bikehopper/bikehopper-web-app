@@ -5,6 +5,7 @@ import * as gtfsRtClient from '../gtfs-rt/client.js';
 import { mergeAlertsIntoRoutes } from '../gtfs-rt/alerts.js';
 import { replacePtRouteLinesWithHighres } from '../lib/route-linestring.js';
 import { mergeElevatorInfoIntoRoutes } from '../lib/elevators.js';
+import type { RouteResponse } from './types.js';
 
 const router = express.Router();
 router.use((req, res, next) => {
@@ -31,9 +32,15 @@ router.get('/route-pt', async (req, res) => {
     ]);
 
     if (graphHopperResult.status === 'rejected') throw graphHopperResult.reason;
-    if (alertResult.status === 'rejected') logger.error(alertResult.reason);
 
-    const routesWithAlerts = mergeAlertsIntoRoutes(alertResult.value, graphHopperResult.value.data);
+    let alerts: gtfsRtClient.GtfsRealtimeAlert[] | null = null;
+    if (alertResult.status === 'rejected') {
+      logger.error(alertResult.reason);
+    } else {
+      alerts = alertResult.value;
+    }
+
+    const routesWithAlerts = mergeAlertsIntoRoutes(alerts , graphHopperResult.value.data as RouteResponse | null);
     res.json(
       mergeElevatorInfoIntoRoutes(
         replacePtRouteLinesWithHighres(routesWithAlerts)
@@ -41,8 +48,8 @@ router.get('/route-pt', async (req, res) => {
     );
   } catch (error) {
     logger.error(error);
-    if (error.response) {
-      res.status(error.response.status).send(error.response.data);
+    if ((error as any).response) {
+      res.status((error as any).response.status).send((error as any).response.data);
     }
     else {
       res.status(500);
@@ -52,7 +59,9 @@ router.get('/route-pt', async (req, res) => {
   }
 });
 
-const passthruRoutes = [
+
+
+const passthruRoutes: Array<['get' | 'post', string]> = [
   ['get', '/'],
   ['get', '/i18n'],
   ['get', '/i18n/:locale'],
@@ -79,8 +88,8 @@ passthruRoutes.forEach(([method, path]) => {
       res.send(resp.data);
     } catch (error) {
       logger.error(error);
-      if (error.response) {
-        res.status(error.response.status).send(error.response.data);
+      if ((error as any).response) {
+        res.status((error as any).response.status).send((error as any).response.data);
       }
       else {
         res.status(500);
