@@ -30,7 +30,7 @@ function _getElevatorInfo() {
   return _elevatorInfo;
 }
 
-export function mergeElevatorInfoIntoRoutes(routeResult: RouteResponse) {
+export function mergeElevatorInfoIntoRoutes(routeResult: RouteResponse | null) {
   _getElevatorInfo();
   if (!routeResult || !routeResult.paths || !_elevatorInfo) return routeResult;
 
