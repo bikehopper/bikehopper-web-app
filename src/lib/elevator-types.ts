@@ -12,4 +12,5 @@ export const ElevatorInfoParser = z.object({
 
 export const ElevatorsJsonParser = z.record(z.string(), z.array(ElevatorInfoParser));
 
+export type ElevatorInfo = z.infer<typeof ElevatorInfoParser>;
 export type ElevatorsJson = z.infer<typeof ElevatorsJsonParser>;

@@ -1,8 +1,10 @@
 import { DateTime } from 'luxon';
+import type { RouteResponse, TransitAlert, TransitLegRaw } from '../graphhopper/types.js';
+import type { GtfsRealtimeAlert } from './client.js';
 
 // Merges relevant GTFS service alerts into a GraphHopper response.
 // Mutates the routeResult param.
-export function mergeAlertsIntoRoutes(alerts, routeResult) {
+export function mergeAlertsIntoRoutes(alerts: GtfsRealtimeAlert[] | null, routeResult: RouteResponse | null) {
   if (!routeResult || !routeResult.paths || !alerts) return routeResult;
 
   for (const path of routeResult.paths) {
@@ -19,7 +21,7 @@ export function mergeAlertsIntoRoutes(alerts, routeResult) {
   return routeResult;
 }
 
-function _doesAlertApplyToLeg(alert, leg) {
+function _doesAlertApplyToLeg(alert: GtfsRealtimeAlert, leg: TransitLegRaw): boolean {
   // no alerts apply to non-publictransit legs
   if (leg.type !== 'pt') return false;
 
@@ -28,10 +30,10 @@ function _doesAlertApplyToLeg(alert, leg) {
     && DateTime.fromISO(leg.departure_time).toMillis();
   const arriveTs = typeof leg.arrival_time === 'string'
     && DateTime.fromISO(leg.arrival_time).toMillis();
-  if (departTs && arriveTs && alert.activePeriod.length > 0) {
+  if (departTs && arriveTs && alert.activePeriod && alert.activePeriod.length > 0) {
     if (!alert.activePeriod.some(timeRange => {
-      const rangeStart = 1000 * parseInt(timeRange.start, 10);
-      const rangeEnd = 1000 * parseInt(timeRange.end, 10);
+      const rangeStart = 1000 * parseInt(timeRange.start as any, 10);
+      const rangeEnd = 1000 * parseInt(timeRange.end as any, 10);
       return !(rangeEnd < departTs || rangeStart > arriveTs);
     })) {
       return false;
@@ -39,78 +41,82 @@ function _doesAlertApplyToLeg(alert, leg) {
   }
 
   // check if any of the alert's informed entities are relevant
-  for (const entity of alert.informedEntity) {
-    // Note: The strings (stop ID, trip ID, route ID) can be present but empty string.
-    // In those cases we want to ignore them. So we test if they are falsy, to cover
-    // empty string, undefined, or null.
-    //
-    // In contrast, the routeType enum uses 0 to mean tram, so we compare that against
-    // null/undefined rather than checking for truthiness, to make sure we don't ignore
-    // a value of 0.
-
-    // if entity includes stop ID, this leg must pass that stop
-    if (entity.stopId && leg.stops.every(stop => stop.stop_id !== entity.stopId))
-      continue;
-
-    // if entity includes trip ID, this leg must use that trip
-    if (entity.trip?.tripId && leg.trip_id && leg.trip_id !== entity.trip.tripId)
-      continue;
-
-    // if entity includes route ID, this leg must use that route.
-    if (entity.routeId && leg.route_id !== entity.routeId)
-      continue;
-
-    if (entity.agencyId && leg.agency_id !== entity.agencyId)
-      continue;
-
-    // Not sure if this is the protobuf library's fault or gtfs-realtime-bindings' fault,
-    // but if no routeType is provided in the data, entity.routeType evaluates to 0, rather
-    // than null/undefined, despite the fact that route type 0 has a very different meaning
-    // (no route type means the alert affects all route types; route type 0 means the
-    // alert only affects trams). We have to work around this by using hasOwn.
-    if (Object.hasOwn(entity, 'routeType') && entity.route_type !== entity.routeType)
-      continue;
-
-    // TODO: Support filtering out alerts with no trip_id, but a trip descriptor
-    // including a start time, and support filtering out alerts with a direction_id.
-    // For now those conditions are ignored, which may display irrelevant alerts.
-    //
-    // Other than that, we've tested every property that might filter out the alert,
-    // so this alert DOES appear to be relevant to this leg:
-    return true;
+  if (alert.informedEntity) {
+    for (const entity of alert.informedEntity) {
+      // Note: The strings (stop ID, trip ID, route ID) can be present but empty string.
+      // In those cases we want to ignore them. So we test if they are falsy, to cover
+      // empty string, undefined, or null.
+      //
+      // In contrast, the routeType enum uses 0 to mean tram, so we compare that against
+      // null/undefined rather than checking for truthiness, to make sure we don't ignore
+      // a value of 0.
+  
+      // if entity includes stop ID, this leg must pass that stop
+      if (entity.stopId && leg.stops.every(stop => stop.stop_id !== entity.stopId))
+        continue;
+  
+      // if entity includes trip ID, this leg must use that trip
+      if (entity.trip?.tripId && leg.trip_id && leg.trip_id !== entity.trip.tripId)
+        continue;
+  
+      // if entity includes route ID, this leg must use that route.
+      if (entity.routeId && leg.route_id !== entity.routeId)
+        continue;
+  
+      if (entity.agencyId && leg.agency_id !== entity.agencyId)
+        continue;
+  
+      // Not sure if this is the protobuf library's fault or gtfs-realtime-bindings' fault,
+      // but if no routeType is provided in the data, entity.routeType evaluates to 0, rather
+      // than null/undefined, despite the fact that route type 0 has a very different meaning
+      // (no route type means the alert affects all route types; route type 0 means the
+      // alert only affects trams). We have to work around this by using hasOwn.
+      if (Object.hasOwn(entity, 'routeType') && (entity as any).route_type !== entity.routeType)
+        continue;
+  
+      // TODO: Support filtering out alerts with no trip_id, but a trip descriptor
+      // including a start time, and support filtering out alerts with a direction_id.
+      // For now those conditions are ignored, which may display irrelevant alerts.
+      //
+      // Other than that, we've tested every property that might filter out the alert,
+      // so this alert DOES appear to be relevant to this leg:
+      return true;
+    }
   }
+
+  return false;
 }
 
-function _serializeAlert(alert) {
+function _serializeAlert(alert: GtfsRealtimeAlert): TransitAlert {
   return {
-    entities: alert.informedEntity.map(entity => ({
-      stop_id: entity.stopId,
+    entities: alert.informedEntity?.map(entity => ({
+      stop_id: entity.stopId || null,
       trip_id: entity.trip?.tripId || null,
       // As noted above, we must check if the routeType property is actually present
       // or else evaluating a missing value will result in 0, which means tram.
-      route_type: Object.hasOwn(entity, 'routeType') ? entity.routeType : null,
-      route_id: entity.routeId,
-      agency_id: entity.agencyId,
-    })),
-    time_ranges: alert.activePeriod.map(timeRange => ({
-      start: 1000 * parseInt(timeRange.start, 10),
-      end: 1000 * parseInt(timeRange.end, 10),
-    })),
+      route_type: (Object.hasOwn(entity, 'routeType') ? entity.routeType : null) || null,
+      route_id: entity.routeId || null,
+      agency_id: entity.agencyId || null,
+    })) || [],
+    time_ranges: alert.activePeriod?.map(timeRange => ({
+      start: 1000 * parseInt(timeRange.start as any, 10),
+      end: 1000 * parseInt(timeRange.end as any, 10),
+    })) || [],
     header_text: {
-      translation: alert.headerText.translation.map(translation => ({
-        language: translation.language,
-        text: translation.text,
-      })),
+      translation: alert.headerText?.translation?.map(translation => ({
+        language: translation.language || '',
+        text: translation.text || '',
+      })) || [],
     },
     description_text: {
-      translation: alert.descriptionText.translation.map(translation => ({
-        language: translation.language,
-        text: translation.text,
-      })),
+      translation: alert.descriptionText?.translation?.map(translation => ({
+        language: translation.language || '',
+        text: translation.text || '',
+      })) || [],
     },
-    cause: alert.cause,
-    effect: alert.effect,
-    severity_level: alert.severityLevel,
+    cause: alert.cause || 0,
+    effect: alert.effect || 0,
+    severity_level: alert.severityLevel || 0,
     // There are a few more possible fields we could add support for, like
     // url, tts_header_text, tts_description_text.
   };
