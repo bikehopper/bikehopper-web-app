@@ -1,6 +1,7 @@
 import { writeFile } from 'node:fs/promises';
 import turfConvex from '@turf/convex';
 import turfBuffer from '@turf/buffer';
+import { point, featureCollection } from '@turf/helpers';
 import { resolve } from 'node:path';
 
 import { getAgencies, getRoutes, getStops } from 'gtfs';
@@ -15,14 +16,14 @@ import { getAgencies, getRoutes, getStops } from 'gtfs';
  * The approach is to compute a buffered hull around all the transit stops,
  * excluding some stops that are filtered out by route ID or agency ID.
  * 
- * @param {string} filteredAgencyIdsString comma separated sting of agency ids
- * @param {string} manuallyFilteredRouteIdsString  comma separated string of route ids
+ * @param {string[]} filteredAgencyIdsString comma separated sting of agency ids
+ * @param {string[]} manuallyFilteredRouteIdsString  comma separated string of route ids
  * @param {string} boundsOutputPath Path to directory to output the generated data into
  */
 export default async function generateLocalTransitBounds(
-  filteredAgencyIds,
-  manuallyFilteredRouteIds,
-  boundsOutputPath,
+  filteredAgencyIds: string[],
+  manuallyFilteredRouteIds: string[],
+  boundsOutputPath: string,
 ) {
   /*
   * When computing the transit service area, we want to only include stops
@@ -34,9 +35,10 @@ export default async function generateLocalTransitBounds(
   * Sacramento, if we did not filter Capitol Corridor. Filtering out transit
   * stops both by agency ID and by route ID is supported.
   */
-  const allAgencyIds = new Set(
+  const allAgencyIds: Set<string> = new Set(
     getAgencies({}, ['agency_id'])
       .map(agency => agency.agency_id)
+      .filter((agencyId): agencyId is string=> agencyId != null)
   );
   const interestingAgencyIds = allAgencyIds.difference(new Set(filteredAgencyIds));
 
@@ -55,26 +57,29 @@ export default async function generateLocalTransitBounds(
     ['stop_id', 'stop_lon', 'stop_lat'],
   );
 
-  const interestingStopsAsGeoJsonPoints = interestingStops.map(stop => ({
-    'type': 'Feature',
-    'geometry': {
-      'type': 'Point',
-      'coordinates': [stop.stop_lon, stop.stop_lat],
-    },
-    'properties': {},
-  }));
+  const interestingStopsAsGeoJsonPoints: GeoJSON.Feature[] = [];
 
-  const interestingStopsCollection = {
-    type: 'FeatureCollection',
-    features: interestingStopsAsGeoJsonPoints,
-  };
+  for (const stop of interestingStops) {
+    if (stop.stop_lat && stop.stop_lon) {
+      interestingStopsAsGeoJsonPoints.push
+        (point([stop.stop_lon, stop.stop_lat])
+      );
+    }
+  }
+
+  const interestingStopsCollection = featureCollection(interestingStopsAsGeoJsonPoints);
 
   const convexHull = turfConvex(interestingStopsCollection);
-  const bufferedHull = turfBuffer(convexHull, 5, {units: 'miles'});
 
-  await writeFile(
-    resolve(boundsOutputPath, 'transit-service-area.json'),
-    JSON.stringify(bufferedHull, null, 2),
-    'utf8',
-  );
+  if (convexHull != null) {
+    const bufferedHull = turfBuffer(convexHull, 5, {units: 'miles'});
+  
+    await writeFile(
+      resolve(boundsOutputPath, 'transit-service-area.json'),
+      JSON.stringify(bufferedHull, null, 2),
+      'utf8',
+    );
+  } else {
+    console.error('Failed to generate convex hull for transit-service-area.json');
+  }
 }
