@@ -1,0 +1,120 @@
+import { resolve } from 'node:path';
+import { mkdir, writeFile, stat } from 'node:fs/promises';
+import { closeDb, importGtfs, openDb } from 'gtfs';
+
+import generateLocalTransitBounds from './generate-local-transit-bounds.js';
+import generateRouteLineClippingLookupTables from './generate-route-line-clipping-lookup-tables.js';
+import generateRouteTiles from './generate-route-tiles.js';
+import processElevatorInfo from './process-elevator-info.js';
+
+import {
+  FILTERED_AGENCY_IDS as ENV_FILTERED_AGENCY_IDS,
+  MANUALLY_FILTERED_ROUTE_IDS as ENV_MANUALLY_FILTERED_ROUTE_IDS,
+} from '../../src/config.js';
+import { existsSync } from 'node:fs';
+
+/*
+ * This script generates several assets from the GTFS zip file.
+ * These assets are used in bikehopper-web-app to expose some data from the GTFS files.
+ * The assets are:
+ *  1. transit-service-area.json: 
+ *     A rough GeoJSON polygon describing the area served transit in the GTFS
+ *  2. route-line-lookup.json:
+ *     Lookup tables that provide easy lookups for locations of transit stops, 
+ *     route LineString shapes, and extra information for clipping route LineStrings between two stops.
+ *  3. gtfs.db: a SQLite database with all the GTFS feed info.
+ *  4. route-tiles and stop-tiles: Map tiles for displaying route and stop
+ *     information.
+ */
+
+// Initialize temprary folders to hold gtfs files
+const gtfsFilePath = resolve('data/gtfs.zip');
+const elevatorInfoPath = resolve('data/elevators.csv');
+const outputPath = resolve('config/geoconfigs');
+await mkdir(outputPath, { recursive: true });
+const sqlitePath = resolve(outputPath, 'gtfs.db');
+
+const gtfsImportConfig = {
+  agencies: [
+    {
+      path: gtfsFilePath,
+    },
+  ],
+  sqlitePath,
+  // Bad data violating primary-key rules in the GTFS is pretty common:
+  ignoreDuplicates: true,
+};
+
+// Import the GTFS zip to a DB, but skip if GTFS DB already exists and is
+// newer than zip.
+const gtfsZipModificationTime = (await stat(gtfsFilePath)).mtimeMs;
+let gtfsDbModificationTime;
+try {
+  gtfsDbModificationTime = (await stat(sqlitePath)).mtimeMs;
+} catch(e) {
+  // File not found is normal. Rethrow any other errors
+  if ((e as any)?.code !== 'ENOENT' || (e as any).syscall !== 'stat') {
+    throw e;
+  }
+}
+if (
+  gtfsDbModificationTime == null
+  || gtfsZipModificationTime >= gtfsDbModificationTime
+) {
+  console.log('Importing GTFS DB');
+  await importGtfs(gtfsImportConfig);
+} else {
+  console.log('Skipping GTFS DB import: DB already newer than zip');
+}
+
+const gtfsDb = openDb(gtfsImportConfig);
+
+// Generate transit-service-area.json
+await generateLocalTransitBounds(
+  ENV_FILTERED_AGENCY_IDS.split(','),
+  ENV_MANUALLY_FILTERED_ROUTE_IDS.split(','),
+  outputPath
+);
+
+console.log(`Finished writing transit-service-area.json to: ${outputPath}`)
+
+// Generate elevators.json
+if (existsSync(elevatorInfoPath)) {
+  console.log(`Processing elevator info from ${elevatorInfoPath}`);
+  const elevatorInfo = processElevatorInfo(elevatorInfoPath);
+  const elevOutputPath = resolve(outputPath, 'elevators.json');
+  await writeFile(elevOutputPath, JSON.stringify(elevatorInfo), 'utf8');
+  console.log(`Finished writing elevator info to: ${elevOutputPath}`)
+} else {
+  console.log('No elevator info defined; skipping');
+}
+
+// Generate route-line-lookup.json
+const routelineLookups = await generateRouteLineClippingLookupTables();
+const { routeTripShapeLookup, shapeIdLineStringLookup, tripIdStopIdsLookup } = routelineLookups;
+
+// Write the JSON dictionaries to disk so we can use it in bikehopper-web-app at request time for fast lookups
+await writeFile(
+  resolve(outputPath, 'route-line-lookup.json'),
+  JSON.stringify({
+    routeTripShapeLookup,
+    shapeIdLineStringLookup,
+    tripIdStopIdsLookup,
+  }),
+  'utf8',
+);
+
+console.log(`Finished writing route-line-lookup.json to: ${outputPath}`)
+
+try {
+  await generateRouteTiles(
+    routelineLookups,
+    outputPath,
+  );
+  console.log(`Finished writing /route-tiles to: ${outputPath}`)
+} catch(e) {
+  console.error('Failed to generate route tiles');
+  console.error(e);
+}
+
+closeDb(gtfsDb);

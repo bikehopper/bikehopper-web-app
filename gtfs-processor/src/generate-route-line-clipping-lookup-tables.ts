@@ -1,6 +1,12 @@
+import type { RouteLinestringLookup } from '../../src/lib/types.js';
 import getRouteTripShapeLookup from './get-route-id-trip-id-shape-id-lookup.js';
 import getShapesLookup from './get-shapes-lookup.js';
 import getStopsForTripLookup from './get-trip-id-stop-ids-lookup.js';
+
+export type GTFSLookUptables = RouteLinestringLookup & {
+  tripRouteLookup: Map<string, Set<string>>,
+  stopIdTripIdsLookup: Map<string, Set<string>>,
+};
 
 /**
  * Computes 3 lookup tables:
@@ -26,7 +32,7 @@ import getStopsForTripLookup from './get-trip-id-stop-ids-lookup.js';
  *    stopIdTripIdsLookup: Map<<stop-id> : Set<<trip-id>>,
  * }
  */
-export default async function generateRouteLineClippingLookupTables() {
+export default async function generateRouteLineClippingLookupTables(): Promise<GTFSLookUptables> {
   console.log('Starting build of routeline clipping tables');
   const {routeTripShapeLookup, tripRouteLookup} = await getRouteTripShapeLookup();
   console.log('Built <route-id, trip-id> : <shape-id> table');
