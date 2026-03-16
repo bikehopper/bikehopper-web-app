@@ -6,10 +6,10 @@
   "type": "module",
   "scripts": {
     "postinstall": "sync-data -f gtfs,region_config,elevators",
-    "build": "npm run gtfs-process",
-    "start": "node src/index.js",
-    "dev": "NODE_ENV=development node src/index.js",
-    "gtfs-process": "node ./gtfs-processor/src/generate-gtfs-derived-assets.js",
+    "build": "npx tsc && npm run gtfs-process",
+    "start": "node ./dist/src/index.js",
+    "dev": "NODE_ENV=development node ./dist/src/index.js",
+    "gtfs-process": "node ./dist/gtfs-processor/src/generate-gtfs-derived-assets.js",
     "lint": "eslint"
   },
   "author": "BikeHopper team",
@@ -54,7 +54,6 @@
     "eslint": "^9.38.0",
     "globals": "^16.4.0",
     "nodemon": "^3.1.0",
-    "tsc": "^2.0.4",
     "typescript": "^5.9.3"
   }
 }

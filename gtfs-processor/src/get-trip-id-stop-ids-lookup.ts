@@ -29,7 +29,7 @@ export default async function getStopsForTripLookup() {
       if (trips) {
         trips.add(tripId);
       } else {
-        stopIdTripIdsLookup.set(tripId, new Set([stopId]));
+        stopIdTripIdsLookup.set(stopId, new Set([tripId]));
       }
     }
   }
