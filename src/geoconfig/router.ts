@@ -14,7 +14,7 @@ import { TransitServiceAreaParser, type TransitServiceArea, type FullRegionConfi
 const router = express.Router();
 let transitServiceAreaCache: TransitServiceArea | null = null;
 
-router.get('/', async (req, res) => {
+router.get('/', async (_, res) => {
   let transitServiceArea = transitServiceAreaCache;
   if (!transitServiceArea) {
     try {

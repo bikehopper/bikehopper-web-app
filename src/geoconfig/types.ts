@@ -13,7 +13,7 @@ export const RegionConfigParser = z.object({
       vehiclePositions: z.httpUrl(),
       tripUpdates: z.httpUrl(),
   }),
-  timezone: z.httpUrl(),
+  timezone: z.string(),
 });
 
 export type RegionConfig = z.infer<typeof RegionConfigParser>;

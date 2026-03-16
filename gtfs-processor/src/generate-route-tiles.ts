@@ -9,6 +9,7 @@ import runTippecanoe  from '@bikehopper/node-tippecanoe';
 import type { RouteLinestringLookup } from '../../src/lib/types.js';
 import type { GTFSLookUptables } from './generate-route-line-clipping-lookup-tables.js';
 
+// taken from https://gtfs.org/documentation/schedule/reference/#routestxt
 const ROUTE_TYPE_TO_STRING = {
   0: 'tram',
   1: 'subway',
@@ -88,9 +89,6 @@ async function appendStops(
   routeLineLookups: GTFSLookUptables, 
   routeTypeLookup: Map<string, RouteTypeNumbers>,
 ): Promise<void> {
-  // taken from https://gtfs.org/documentation/schedule/reference/#routestxt
-  
-
   // Helper function that uses the lookup tables to infer all the route-types that are accesible at a stop
   const getRouteTypesForStop = (stopId: string): Set<RouteTypeStrings> => {
     const { tripRouteLookup, stopIdTripIdsLookup } = routeLineLookups;
