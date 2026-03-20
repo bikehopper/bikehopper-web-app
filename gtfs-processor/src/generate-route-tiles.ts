@@ -23,8 +23,8 @@ const ROUTE_TYPE_TO_STRING = {
   12: 'monorail',
 } as const; 
 
-type RouteTypeStrings = typeof ROUTE_TYPE_TO_STRING[keyof typeof ROUTE_TYPE_TO_STRING];
 type RouteTypeNumbers = keyof typeof ROUTE_TYPE_TO_STRING;
+type RouteTypeStrings = typeof ROUTE_TYPE_TO_STRING[RouteTypeNumbers];
 
 /**
  * Given a row of route, finds the corresponding shapes from the shapes lookup tables.
@@ -48,8 +48,7 @@ async function appendRouteLineStringToFile(
   const trips = routeTripShapeLookup[routeId];
   if (trips) {
     const seenShapes = new Map();
-    for (const tripId of Object.keys(trips)) {
-      const shapeId = trips[tripId];
+    for (const [tripId, shapeId] of Object.entries(trips)) {
       const shape = shapeIdLineStringLookup[shapeId!];
       if (shape) {
         if (!seenShapes.has(shapeId)) {
@@ -74,6 +73,8 @@ async function appendRouteLineStringToFile(
     }
   }
 }
+
+export type StopProperties = {stop_name: string | null; stop_id: string} & Partial<Record<RouteTypeStrings, boolean>>;
 
 /**
  * Appends all the stops to the LDGeoJson file
@@ -126,7 +127,7 @@ async function appendStops(
     const lon = parseFloat(`${stop['stop_lon']!}`);
 
     if (!isNaN(lat) && !isNaN(lon) && !!stopId) {
-      const properties: Record<string, string | boolean | null> = {
+      const properties: StopProperties = {
         stop_name: stopName,
         stop_id: stopId,
       };

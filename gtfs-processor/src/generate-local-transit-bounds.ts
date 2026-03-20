@@ -35,7 +35,7 @@ export default async function generateLocalTransitBounds(
   * Sacramento, if we did not filter Capitol Corridor. Filtering out transit
   * stops both by agency ID and by route ID is supported.
   */
-  const allAgencyIds: Set<string> = new Set(
+  const allAgencyIds = new Set(
     getAgencies({}, ['agency_id'])
       .map(agency => agency.agency_id)
       .filter((agencyId): agencyId is string=> agencyId != null)
