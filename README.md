@@ -12,7 +12,9 @@ Prerequisites:
 Then:
 - `git clone` this repo
 - `npm install` 
-    - This will also install data dependencies like gtfs.zip
+- For SF Bay Area: `npm run syncdata`
+    - This will install data dependencies like gtfs.zip
+    - For other regions, you'll need to put in place the relevant data yourself
 - `npm run build`
     - This will build artifacts from the data dependencies
 - Setup Environment variables:
