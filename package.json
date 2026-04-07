@@ -5,7 +5,7 @@
   "main": "src/index.js",
   "type": "module",
   "scripts": {
-    "postinstall": "sync-data -f gtfs,region_config,elevators",
+    "syncdata": "sync-data -f gtfs,region_config,elevators",
     "build": "npx tsc && npm run gtfs-process",
     "start": "node ./dist/src/index.js",
     "dev": "NODE_ENV=development node ./dist/src/index.js",
